@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ideal Dots — Publicity &amp; Creative Design Agency</title>
+<meta name="description" content="Ideal Dots is a publicity and creative design agency crafting bold brand identities, advertising campaigns, and digital experiences.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%23050505%22/><circle cx=%2233%22 cy=%2250%22 r=%2214%22 fill=%22%23eb9a23%22/><circle cx=%2267%22 cy=%2250%22 r=%2214%22 fill=%22%23ffffff%22/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<noscript><style>.preloader{display:none !important}</style></noscript>
+</head>
+<body>
+
+<div class="preloader" id="preloader" role="status" aria-label="Loading Ideal Dots">
+  <div class="preloader__dots" aria-hidden="true">
+    <span class="preloader__dot"></span>
+    <span class="preloader__dot" id="preloaderPop"></span>
+    <span class="preloader__dot"></span>
+  </div>
+</div>
+
+<div class="dot-cursor" id="dotCursor" aria-hidden="true"></div>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header" id="siteHeader">
+  <div class="container header-inner">
+    <a href="#top" class="logo">
+      <img src="assets/ideal-dots-logo.svg" alt="Ideal Dots" class="logo-img">
+    </a>
+
+    <nav class="main-nav" id="mainNav">
+      <ul>
+        <li><a href="#services" class="nav-link">Services</a></li>
+        <li><a href="#work" class="nav-link">Work</a></li>
+        <li><a href="#process" class="nav-link">Process</a></li>
+        <li><a href="#about" class="nav-link">About</a></li>
+        <li><a href="#contact" class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <a href="#contact" class="btn btn-primary btn-sm">Start a Project</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mainNav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero" id="top">
+   <div class="hero-pin" id="heroPin">
+    <div class="hero-beam" aria-hidden="true"></div>
+    <div class="hero-stars" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="container hero-inner">
+      <h1 class="reveal">
+        We connect the <span class="text-gradient">dots</span><br>
+        between your brand and its <em>audience.</em>
+      </h1>
+      <div class="hero-actions reveal">
+        <a href="#contact" class="btn btn-primary">Start a Project</a>
+        <a href="#work" class="btn btn-outline">See Our Work</a>
+      </div>
+    </div>
+
+    <div class="poster-carousel" id="posterCarousel"
+         role="group" aria-roledescription="carousel" aria-label="Selected film poster work">
+      <div class="poster-stage" id="posterStage">
+        <button class="poster-card" type="button">
+          <span class="poster-inner">
+            <img src="assets/posters/sm1.jpg" alt="SM1 first-look poster" width="560" height="700">
+            <span class="poster-caption">#SM1 first look</span>
+          </span>
+        </button>
+        <button class="poster-card" type="button">
+          <span class="poster-inner">
+            <img src="assets/posters/sharwa36.jpg" alt="Sharwa 36 birthday poster" width="560" height="700" loading="lazy">
+            <span class="poster-caption">#Sharwa36 title reveal</span>
+          </span>
+        </button>
+        <button class="poster-card" type="button">
+          <span class="poster-inner">
+            <img src="assets/posters/production-no-5.jpg" alt="Production No. 5 title announcement poster" width="560" height="700" loading="lazy">
+            <span class="poster-caption">Production No. 5</span>
+          </span>
+        </button>
+        <button class="poster-card" type="button">
+          <span class="poster-inner">
+            <img src="assets/posters/pre-wedding-show.jpg" alt="The Great Pre Wedding Show poster" width="560" height="700" loading="lazy">
+            <span class="poster-caption">The Great Pre Wedding Show</span>
+          </span>
+        </button>
+        <button class="poster-card" type="button">
+          <span class="poster-inner">
+            <img src="assets/posters/dilruba-christmas.jpg" alt="Dilruba Christmas special poster" width="560" height="700" loading="lazy">
+            <span class="poster-caption">Dilruba — festive drop</span>
+          </span>
+        </button>
+        <button class="poster-card" type="button">
+          <span class="poster-inner">
+            <img src="assets/posters/maa-nanna-superhero.jpg" alt="Maa Nanna Superhero trailer poster" width="560" height="700" loading="lazy">
+            <span class="poster-caption">Maa Nanna Superhero</span>
+          </span>
+        </button>
+        <button class="poster-card" type="button">
+          <span class="poster-inner">
+            <img src="assets/posters/musical-video-01.jpg" alt="Musical video announcement poster" width="560" height="700" loading="lazy">
+            <span class="poster-caption">Musical video launch</span>
+          </span>
+        </button>
+        <button class="poster-card" type="button">
+          <span class="poster-inner">
+            <img src="assets/posters/dilruba.jpg" alt="Dilruba film poster" width="560" height="700" loading="lazy">
+            <span class="poster-caption">Dilruba</span>
+          </span>
+        </button>
+        <button class="poster-card" type="button">
+          <span class="poster-inner">
+            <img src="assets/posters/ka-10.jpg" alt="KA-10 title announcement poster" width="560" height="700" loading="lazy">
+            <span class="poster-caption">KA-10 announcement</span>
+          </span>
+        </button>
+        <button class="poster-card" type="button">
+          <span class="poster-inner">
+            <img src="assets/posters/title-reveal.jpg" alt="Illustrated title reveal poster" width="560" height="700" loading="lazy">
+            <span class="poster-caption">Illustrated title reveal</span>
+          </span>
+        </button>
+        <button class="poster-card" type="button">
+          <span class="poster-inner">
+            <img src="assets/posters/musical-video-02.jpg" alt="Musical video teaser poster" width="560" height="700" loading="lazy">
+            <span class="poster-caption">Musical video teaser</span>
+          </span>
+        </button>
+      </div>
+
+      <div class="poster-veil" aria-hidden="true"></div>
+    </div>
+   </div>
+  </section>
+
+  <section class="manifesto" id="story" aria-label="What Ideal Dots does">
+    <div class="story-bg" aria-hidden="true">
+      <canvas class="story-wave" id="storyWave"></canvas>
+      <div class="story-aura"></div>
+      <div class="story-scrim"></div>
+    </div>
+
+    <div class="story-inner">
+      <div class="story-lines" id="storyLines">
+        <p class="story-line">Design that earns attention.</p>
+        <p class="story-line">Campaigns that travel.</p>
+        <p class="story-line">Posters people screenshot.</p>
+        <p class="story-line">Brands that stay with you.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="services" id="services" aria-label="What we do">
+    <div class="svc-track" id="svcTrack">
+      <div class="svc-pin" id="svcPin">
+
+        <div class="svc-rail container" id="svcRail" aria-hidden="true"></div>
+
+        <div class="svc-media" id="svcMedia">
+        <img src="assets/services/main.jpg" alt="" class="svc-shot" data-svc="0" loading="lazy">
+        <img src="assets/services/service-2.jpg" alt="" class="svc-shot" data-svc="1" loading="lazy">
+        <img src="assets/services/service-3.jpg" alt="" class="svc-shot" data-svc="2" loading="lazy">
+        <img src="assets/services/service-4.jpg" alt="" class="svc-shot" data-svc="3" loading="lazy">
+        <img src="assets/services/service-5.jpg" alt="" class="svc-shot" data-svc="4" loading="lazy">
+        <img src="assets/services/service-6.jpg" alt="" class="svc-shot" data-svc="5" loading="lazy">
+          <span class="svc-shade" aria-hidden="true"></span>
+        </div>
+
+        <div class="svc-intro" id="svcIntro">
+          <h2>Publicity that performs,<br>design that sticks.</h2>
+        </div>
+
+        <div class="svc-panel" id="svcPanel">
+          <p class="svc-eyebrow">Our Services</p>
+          <ul class="svc-list" id="svcList">
+          <li class="svc-item" data-svc="0">
+            <span class="svc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.9 19.1 10 12 21.1 4.9 10Z"/><circle cx="12" cy="10" r="2.4"/></svg></span>
+            <span class="svc-body">
+              <h3>Brand Identity</h3>
+              <p>Logos, visual systems and guidelines</p>
+            </span>
+            <span class="svc-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8.5 7H17v8.5"/></svg></span>
+          </li>
+          <li class="svc-item" data-svc="1">
+            <span class="svc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.9v4.2a1.4 1.4 0 0 0 1.4 1.4H7l1.9 4.1"/><path d="M7 15.5V8.5L18.3 4.2v15.6L7 15.5Z"/><path d="M20.9 10.3a2.5 2.5 0 0 1 0 3.4"/></svg></span>
+            <span class="svc-body">
+              <h3>Advertising Campaigns</h3>
+              <p>Strategy-led print, outdoor and broadcast</p>
+            </span>
+            <span class="svc-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8.5 7H17v8.5"/></svg></span>
+          </li>
+          <li class="svc-item" data-svc="2">
+            <span class="svc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.6"/><circle cx="17.6" cy="6.2" r="2.6"/><circle cx="17.6" cy="17.8" r="2.6"/><path d="M8.3 10.8 15.3 7.3"/><path d="M8.3 13.2l7 3.5"/></svg></span>
+            <span class="svc-body">
+              <h3>Social & Digital</h3>
+              <p>Scroll-stopping content and digital ads</p>
+            </span>
+            <span class="svc-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8.5 7H17v8.5"/></svg></span>
+          </li>
+          <li class="svc-item" data-svc="3">
+            <span class="svc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 7.5 12 3.3l8.4 4.2v9L12 20.7l-8.4-4.2v-9Z"/><path d="M3.6 7.5 12 11.7l8.4-4.2"/><path d="M12 11.7v9"/></svg></span>
+            <span class="svc-body">
+              <h3>Print & Packaging</h3>
+              <p>Packaging, editorial and collateral</p>
+            </span>
+            <span class="svc-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8.5 7H17v8.5"/></svg></span>
+          </li>
+          <li class="svc-item" data-svc="4">
+            <span class="svc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.3" y="5.1" width="17.4" height="13.8" rx="3"/><path d="M10.3 9.7 15 12l-4.7 2.3V9.7Z"/></svg></span>
+            <span class="svc-body">
+              <h3>Video & Motion</h3>
+              <p>Short-form video and motion graphics</p>
+            </span>
+            <span class="svc-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8.5 7H17v8.5"/></svg></span>
+          </li>
+          <li class="svc-item" data-svc="5">
+            <span class="svc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.2"/><path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6"/><path d="M15.8 15.8a5.4 5.4 0 0 0 0-7.6"/><path d="M5.4 5.4a9.3 9.3 0 0 0 0 13.2"/><path d="M18.6 18.6a9.3 9.3 0 0 0 0-13.2"/></svg></span>
+            <span class="svc-body">
+              <h3>PR & Media Outreach</h3>
+              <p>Press strategy, media kits and launches</p>
+            </span>
+            <span class="svc-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8.5 7H17v8.5"/></svg></span>
+          </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="stats" id="stats">
+    <div class="container stats-band">
+      <div class="stat reveal">
+        <span class="stat-label">Campaigns launched</span>
+        <span class="stat-value"><span class="stat-number" data-target="180">0</span><span class="stat-unit">+</span></span>
+        <span class="stat-note">Film, retail and brand work</span>
+      </div>
+      <div class="stat reveal">
+        <span class="stat-label">Clients served</span>
+        <span class="stat-value"><span class="stat-number" data-target="92">0</span><span class="stat-unit">+</span></span>
+        <span class="stat-note">Studios, startups and agencies</span>
+      </div>
+      <div class="stat reveal">
+        <span class="stat-label">Years in practice</span>
+        <span class="stat-value"><span class="stat-number" data-target="11">0</span></span>
+        <span class="stat-note">Building publicity that lands</span>
+      </div>
+      <div class="stat reveal">
+        <span class="stat-label">Design awards</span>
+        <span class="stat-value"><span class="stat-number" data-target="27">0</span></span>
+        <span class="stat-note">National and regional juries</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="work" id="work" aria-label="Film titles we have worked on">
+    <div class="container">
+      <h2 class="section-title reveal">Movies we&rsquo;ve worked on.</h2>
+    </div>
+
+    <div class="title-strip" id="titleStrip">
+      <ul class="title-track">
+        <li class="title-card">
+          <img src="assets/titles/oh-sukumari.png" alt="Oh Sukumari" loading="lazy">
+        </li>
+        <li class="title-card">
+          <img src="assets/titles/oh-sukumari.png" alt="Oh Sukumari" loading="lazy">
+        </li>
+        <li class="title-card">
+          <img src="assets/titles/oh-sukumari.png" alt="Oh Sukumari" loading="lazy">
+        </li>
+        <li class="title-card">
+          <img src="assets/titles/oh-sukumari.png" alt="Oh Sukumari" loading="lazy">
+        </li>
+        <li class="title-card">
+          <img src="assets/titles/oh-sukumari.png" alt="Oh Sukumari" loading="lazy">
+        </li>
+        <li class="title-card">
+          <img src="assets/titles/oh-sukumari.png" alt="Oh Sukumari" loading="lazy">
+        </li>
+        <li class="title-card">
+          <img src="assets/titles/oh-sukumari.png" alt="Oh Sukumari" loading="lazy">
+        </li>
+        <li class="title-card">
+          <img src="assets/titles/oh-sukumari.png" alt="Oh Sukumari" loading="lazy">
+        </li>
+        <li class="title-card" aria-hidden="true">
+          <img src="assets/titles/oh-sukumari.png" alt="" loading="lazy">
+        </li>
+        <li class="title-card" aria-hidden="true">
+          <img src="assets/titles/oh-sukumari.png" alt="" loading="lazy">
+        </li>
+        <li class="title-card" aria-hidden="true">
+          <img src="assets/titles/oh-sukumari.png" alt="" loading="lazy">
+        </li>
+        <li class="title-card" aria-hidden="true">
+          <img src="assets/titles/oh-sukumari.png" alt="" loading="lazy">
+        </li>
+        <li class="title-card" aria-hidden="true">
+          <img src="assets/titles/oh-sukumari.png" alt="" loading="lazy">
+        </li>
+        <li class="title-card" aria-hidden="true">
+          <img src="assets/titles/oh-sukumari.png" alt="" loading="lazy">
+        </li>
+        <li class="title-card" aria-hidden="true">
+          <img src="assets/titles/oh-sukumari.png" alt="" loading="lazy">
+        </li>
+        <li class="title-card" aria-hidden="true">
+          <img src="assets/titles/oh-sukumari.png" alt="" loading="lazy">
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="process" id="process" aria-label="How we work">
+    <div class="how-track" id="howTrack">
+      <div class="how-pin" id="howPin">
+        <div class="how-rail container" id="howRail" aria-hidden="true"></div>
+
+        <h2 class="how-title" id="howTitle">From spark to spotlight,<br>in four steps.</h2>
+
+        <ul class="how-cards" id="howCards" data-shot="assets/process/four-steps.jpg">
+          <li class="how-card">
+            <div class="how-card__inner">
+              <span class="how-card__face how-card__face--shot" aria-hidden="true"></span>
+              <div class="how-card__face how-card__face--back">
+                <div class="how-card__head">
+                  <div class="how-card__top">
+                    <span class="how-card__num">01</span>
+                    <span class="how-card__rule" aria-hidden="true"></span>
+                  </div>
+                  <h3>Discover</h3>
+                  <p>We dig into your brand, your audience and the market around you, until the story worth telling is obvious.</p>
+                </div>
+                <ul class="how-card__tags">
+                      <li>Research</li>
+                      <li>Audience</li>
+                      <li>Positioning</li>
+                      <li>Brief</li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="how-card">
+            <div class="how-card__inner">
+              <span class="how-card__face how-card__face--shot" aria-hidden="true"></span>
+              <div class="how-card__face how-card__face--back">
+                <div class="how-card__head">
+                  <div class="how-card__top">
+                    <span class="how-card__num">02</span>
+                    <span class="how-card__rule" aria-hidden="true"></span>
+                  </div>
+                  <h3>Design</h3>
+                  <p>Concepts, key art and messaging are built around that story, then pushed until every frame earns its place.</p>
+                </div>
+                <ul class="how-card__tags">
+                      <li>Concepts</li>
+                      <li>Key art</li>
+                      <li>Messaging</li>
+                      <li>Art direction</li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="how-card">
+            <div class="how-card__inner">
+              <span class="how-card__face how-card__face--shot" aria-hidden="true"></span>
+              <div class="how-card__face how-card__face--back">
+                <div class="how-card__head">
+                  <div class="how-card__top">
+                    <span class="how-card__num">03</span>
+                    <span class="how-card__rule" aria-hidden="true"></span>
+                  </div>
+                  <h3>Deliver</h3>
+                  <p>You review, we refine. Every asset is checked, resized and packaged for the platforms it has to land on.</p>
+                </div>
+                <ul class="how-card__tags">
+                      <li>Refinement</li>
+                      <li>Assets</li>
+                      <li>Formats</li>
+                      <li>Approvals</li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="how-card">
+            <div class="how-card__inner">
+              <span class="how-card__face how-card__face--shot" aria-hidden="true"></span>
+              <div class="how-card__face how-card__face--back">
+                <div class="how-card__head">
+                  <div class="how-card__top">
+                    <span class="how-card__num">04</span>
+                    <span class="how-card__rule" aria-hidden="true"></span>
+                  </div>
+                  <h3>Deploy</h3>
+                  <p>The campaign goes live and we watch it work, tracking reach and response so every dot connects back to you.</p>
+                </div>
+                <ul class="how-card__tags">
+                      <li>Launch</li>
+                      <li>Media plan</li>
+                      <li>Tracking</li>
+                      <li>Reporting</li>
+                </ul>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="process-ticker" aria-label="Our creative disciplines">
+    <div class="process-ticker__track" aria-hidden="true">
+      <span>Think</span><span>Create</span><span>Dominate</span><span>Brand&nbsp;Identity</span>
+      <span>Advertising</span><span>Digital</span><span>Print</span><span>Motion</span>
+      <span>Think</span><span>Create</span><span>Dominate</span><span>Brand&nbsp;Identity</span>
+      <span>Advertising</span><span>Digital</span><span>Print</span><span>Motion</span>
+    </div>
+  </section>
+
+  <section class="about" id="about">
+    <div class="container about-inner">
+      <div class="about-copy reveal">
+        <p class="section-eyebrow">About Ideal Dots</p>
+        <h2 class="section-title">A small studio with a loud portfolio.</h2>
+        <p>
+          Ideal Dots started with a simple idea: publicity design should feel less like
+          noise and more like connection. For over a decade we've partnered with
+          startups and established brands alike to build identities and campaigns
+          that people actually stop to look at.
+        </p>
+        <p>
+          We're strategists, designers, and storytellers who believe the best
+          publicity isn't loud for the sake of it — it's precise, memorable, and
+          exactly on brand.
+        </p>
+        <a href="#contact" class="btn btn-outline">Work With Us</a>
+      </div>
+      <div class="about-visual reveal" aria-hidden="true">
+        <div class="about-dots">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-banner">
+    <div class="container cta-inner reveal">
+      <h2>Ready to make some noise?</h2>
+      <p>Let's connect the dots between your brand and the audience that's waiting for it.</p>
+      <a href="#contact" class="btn btn-light">Start a Project</a>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="container contact-inner">
+      <div class="contact-info reveal">
+        <p class="section-eyebrow">Get In Touch</p>
+        <h2 class="section-title">Let's talk about your next campaign.</h2>
+        <p class="section-lead">Tell us a bit about your project and we'll get back to you within one business day.</p>
+
+        <ul class="contact-list">
+          <li>
+            <span class="contact-icon" aria-hidden="true">&#9993;</span>
+            <a href="mailto:hello@idealdots.studio">hello@idealdots.studio</a>
+          </li>
+          <li>
+            <span class="contact-icon" aria-hidden="true">&#9742;</span>
+            <a href="tel:+15551234567">+1 (555) 123-4567</a>
+          </li>
+          <li>
+            <span class="contact-icon" aria-hidden="true">&#8982;</span>
+            <span>142 Studio Lane, Suite 4, Austin, TX</span>
+          </li>
+        </ul>
+
+        <div class="social-links">
+          <a href="#" aria-label="Instagram">IG</a>
+          <a href="#" aria-label="LinkedIn">IN</a>
+          <a href="#" aria-label="Behance">BE</a>
+          <a href="#" aria-label="X / Twitter">X</a>
+        </div>
+      </div>
+
+      <form class="contact-form reveal" id="contactForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" placeholder="Jane Appleseed" required>
+            <span class="error-msg" id="nameError"></span>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="jane@company.com" required>
+            <span class="error-msg" id="emailError"></span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="company">Company</label>
+            <input type="text" id="company" name="company" placeholder="Your company (optional)">
+          </div>
+          <div class="form-group">
+            <label for="projectType">Project Type</label>
+            <select id="projectType" name="projectType" required>
+              <option value="" disabled selected>Select a service</option>
+              <option value="branding">Brand Identity</option>
+              <option value="advertising">Advertising Campaign</option>
+              <option value="digital">Social &amp; Digital</option>
+              <option value="print">Print &amp; Packaging</option>
+              <option value="video">Video &amp; Motion</option>
+              <option value="other">Something Else</option>
+            </select>
+            <span class="error-msg" id="projectTypeError"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="message">Project Details</label>
+          <textarea id="message" name="message" rows="5" placeholder="Tell us about your goals, timeline, and budget..." required></textarea>
+          <span class="error-msg" id="messageError"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+          <span class="btn-text">Send Message</span>
+        </button>
+
+        <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a href="#top" class="logo">
+        <img src="assets/ideal-dots-logo.svg" alt="Ideal Dots" class="logo-img">
+      </a>
+      <p>A publicity &amp; creative design studio helping brands connect with the audiences they were made for.</p>
+      <div class="social-links">
+        <a href="#" aria-label="Instagram">IG</a>
+        <a href="#" aria-label="LinkedIn">IN</a>
+        <a href="#" aria-label="Behance">BE</a>
+        <a href="#" aria-label="X / Twitter">X</a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#work">Work</a></li>
+        <li><a href="#process">Process</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#services">Brand Identity</a></li>
+        <li><a href="#services">Advertising Campaigns</a></li>
+        <li><a href="#services">Social &amp; Digital</a></li>
+        <li><a href="#services">Print &amp; Packaging</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col footer-newsletter">
+      <h4>Stay in the Loop</h4>
+      <p>Occasional updates on new work &amp; openings. No spam.</p>
+      <form id="newsletterForm" class="newsletter-form">
+        <label for="newsletterEmail" class="sr-only">Email address</label>
+        <input type="email" id="newsletterEmail" placeholder="you@email.com" required>
+        <button type="submit" aria-label="Subscribe">&#8594;</button>
+      </form>
+      <p class="form-status" id="newsletterStatus" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>&copy; <span id="year"></span> Ideal Dots Studio. All rights reserved.</p>
+    <p>Designed &amp; built with care.</p>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">&#8593;</button>
+
+<script src="script.js"></script>
+</body>
+</html>
