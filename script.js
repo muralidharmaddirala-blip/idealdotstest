@@ -1359,6 +1359,9 @@
   const formStatus = document.getElementById('formStatus');
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Phone may only contain digits, spaces and + - ( ) — the digit count is
+  // checked separately so formatting characters do not count toward it.
+  const phonePattern = /^[\d\s+()-]+$/;
 
   const setFieldError = (id, message) => {
     const field = document.getElementById(id);
@@ -1385,6 +1388,21 @@
       valid = false;
     } else {
       setFieldError('email', '');
+    }
+
+    const phone = document.getElementById('phone').value.trim();
+    const phoneDigits = phone.replace(/\D/g, '');
+    if (!phone) {
+      setFieldError('phone', 'Please enter your phone number.');
+      valid = false;
+    } else if (!phonePattern.test(phone)) {
+      setFieldError('phone', 'Use only digits, spaces and + - ( ) characters.');
+      valid = false;
+    } else if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+      setFieldError('phone', 'Please enter a phone number with 10 to 15 digits.');
+      valid = false;
+    } else {
+      setFieldError('phone', '');
     }
 
     const projectType = document.getElementById('projectType').value;
@@ -1429,12 +1447,13 @@
       // Lock the button so the form cannot be submitted twice while in flight.
       submitBtn.disabled = true;
 
-      // Collect the five form fields. `service` is the #projectType select
+      // Collect the form fields. `service` is the #projectType select
       // (labelled "Select a service" in the form) and is sent under the key
       // `service`; it carries the option value, not the visible label.
       const payload = new URLSearchParams({
         name: document.getElementById('name').value.trim(),
         email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
         company: document.getElementById('company').value.trim(),
         service: document.getElementById('projectType').value,
         message: document.getElementById('message').value.trim()
