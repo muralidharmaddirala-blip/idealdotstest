@@ -1406,46 +1406,63 @@
     return valid;
   };
 
-  // The Apps Script web app behind the sheet. Swap this if the script is
-  // redeployed — a new deployment issues a new /exec URL.
-  const SHEET_ENDPOINT =
-    'https://script.google.com/macros/s/AKfycbzsSpVHUYD8KDv8MmkYx7vj70MHo5nzrTLgj__DBQjpcjpDJ9qUvAxAPpcdeyiYWF-8KA/exec';
+  // Where contact form submissions are posted. Swap in the deployed web app
+  // URL — nothing else below needs to change.
+  const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbzsSpVHUYD8KDv8MmkYx7vj70MHo5nzrTLgj__DBQjpcjpDJ9qUvAxAPpcdeyiYWF-8KA/exec";
 
   if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
+      // Stop the native submit so the browser stays on the page.
       e.preventDefault();
 
+      // Validation runs first and unchanged — nothing is sent unless it passes.
       if (!validateContactForm()) {
         formStatus.textContent = 'Please fix the highlighted fields and try again.';
         formStatus.className = 'form-status error';
         return;
       }
 
-      const label = submitBtn.querySelector('.btn-text');
-      submitBtn.disabled = true;
-      label.textContent = 'Sending...';
+      // Clear the status left over from any previous attempt.
       formStatus.textContent = '';
       formStatus.className = 'form-status';
 
-      // Sent as a simple request — url-encoded body, no custom headers — so the
-      // browser does not preflight it, which an Apps Script web app will not
-      // answer. The reply cannot be read back across origins, so this is sent
-      // once and not retried: a retry would post the row to the sheet twice.
-      const body = new URLSearchParams(new FormData(contactForm));
-      body.append('submittedAt', new Date().toISOString());
+      // Lock the button so the form cannot be submitted twice while in flight.
+      submitBtn.disabled = true;
+
+      // Collect the five form fields. `service` is the #projectType select
+      // (labelled "Select a service" in the form) and is sent under the key
+      // `service`; it carries the option value, not the visible label.
+      const payload = new URLSearchParams({
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        company: document.getElementById('company').value.trim(),
+        service: document.getElementById('projectType').value,
+        message: document.getElementById('message').value.trim()
+      });
 
       try {
-        await fetch(SHEET_ENDPOINT, { method: 'POST', mode: 'no-cors', body });
-        formStatus.textContent = "Thanks! Your message has been sent — we'll be in touch within one business day.";
-        formStatus.className = 'form-status success';
+        // POST as application/x-www-form-urlencoded: passing URLSearchParams as
+        // the body sets that Content-Type automatically, and because it is a
+        // CORS-safelisted type the browser sends no preflight request.
+        const response = await fetch(SHEET_ENDPOINT, {
+          method: 'POST',
+          body: payload,
+          redirect: 'follow'
+        });
+
+        // Any completed request counts as a success here — the response body
+        // is not inspected, only a thrown fetch is treated as a failure.
         contactForm.reset();
+        formStatus.textContent = 'Thank you! Your message has been sent successfully.';
+        formStatus.className = 'form-status success';
       } catch (err) {
-        formStatus.textContent =
-          'Sorry — that could not be sent. Please check your connection and try again, or email hello@idealdots.studio.';
+        // The request never completed (network failure, blocked by CORS). What
+        // the user typed is left in place so they can retry without retyping it.
+        formStatus.textContent = 'Sorry, something went wrong. Please try again.';
         formStatus.className = 'form-status error';
       } finally {
+        // Re-enable the button on both the success and failure paths.
         submitBtn.disabled = false;
-        label.textContent = 'Send Message';
       }
     });
 
