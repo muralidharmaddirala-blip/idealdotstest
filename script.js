@@ -1409,7 +1409,7 @@
   // The Apps Script web app behind the sheet. Swap this if the script is
   // redeployed — a new deployment issues a new /exec URL.
   const SHEET_ENDPOINT =
-    'https://script.google.com/macros/s/AKfycbxoleaMYu0xrQjBupHy7CqG_1E939fyn7CTOMUaKGXbyWiWaJjufKoQ7__wstQTB5XH/exec';
+    'https://script.google.com/macros/s/AKfycbzsSpVHUYD8KDv8MmkYx7vj70MHo5nzrTLgj__DBQjpcjpDJ9qUvAxAPpcdeyiYWF-8KA/exec';
 
   if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
