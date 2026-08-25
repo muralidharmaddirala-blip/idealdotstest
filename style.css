@@ -1546,18 +1546,29 @@ section { padding: var(--space-section) 0; }
   margin-bottom: 16px;
   font-weight: 500;
 }
+/* Filled like .btn-primary ("Start a Project"): brand gradient, black glyph. */
 .contact-icon {
   width: 40px; height: 40px;
   border-radius: 12px;
-  background: var(--color-bg-alt);
-  border: 1px solid var(--color-line);
+  background: var(--gradient-brand);
+  color: #000000;
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: border-color var(--transition), color var(--transition);
+  transition: transform var(--transition), box-shadow var(--transition);
 }
-.contact-list li:hover .contact-icon { border-color: var(--color-primary); color: var(--color-primary); }
+/* Same hover as .btn-primary — lift plus the accent glow. */
+.contact-list li:hover .contact-icon { transform: translateY(-2px); box-shadow: var(--glow-accent); }
+/* Glyphs inherit the tile's black colour via currentColor. */
+.contact-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  display: block;
+}
 
 .social-links {
   display: flex;
