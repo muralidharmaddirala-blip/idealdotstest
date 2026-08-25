@@ -1580,6 +1580,13 @@ section { padding: var(--space-section) 0; }
   border-color: transparent;
   transform: translateY(-3px);
 }
+/* Brand glyphs inherit the link colour, so the hover swap applies to them too. */
+.social-links a svg {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+  display: block;
+}
 
 .contact-form {
   background: var(--color-bg-alt);
