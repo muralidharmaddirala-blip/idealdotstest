@@ -1916,3 +1916,30 @@ section { padding: var(--space-section) 0; }
 @media (max-width: 768px) and (max-height: 600px) {
   .poster-carousel { --card-h: min(79.6vw, 43vh); }
 }
+
+/* ===================================================================
+   MOBILE ONLY (<= 768px) — brand story band (below the posters)
+   =================================================================== */
+@media (max-width: 768px) {
+
+  /* Was a full viewport tall, which opened most of a screen of empty black
+     between the posters above and the services below. Sized to the dot field
+     plus its margin instead, so the band reads as one piece with its
+     neighbours rather than a gap between them. */
+  .manifesto {
+    min-height: 52vh;
+    padding: clamp(20px, 4vh, 40px) 24px;
+  }
+
+  /* Larger copy, on a measure narrow enough that every line breaks to exactly
+     two. Both the size and the measure are in vw and nothing else governs in
+     the mobile range, so their ratio is fixed and the break holds at 320px as
+     firmly as at 430px — not tuned to one handset. */
+  .story-lines {
+    --story-fz: clamp(1.5rem, 8.6vw, 2.7rem);
+    width: min(1000px, 76vw);
+    /* Two lines of --story-fz at the 1.1 line-height the lines already carry. */
+    height: calc(var(--story-fz) * 2.2 + 4px);
+  }
+  .story-line { font-size: var(--story-fz); }
+}

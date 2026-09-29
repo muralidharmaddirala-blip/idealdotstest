@@ -1064,12 +1064,15 @@
       // Measured off the reference: dots sit on a fixed lattice and only their
       // radius changes, and the motion is a single pulse born at the centre
       // that travels outward and fades — not a continuous wave train.
+      const storyNarrow = window.matchMedia('(max-width: 768px)');
+
       const PULSES = 2;                      // overlapped, so one is always travelling
       const SPAWN = SPAWN_MS / 1000;         // a new ripple every 2.4s
       const PERIOD = SPAWN * PULSES;         // seconds for one ripple to cross
       const BUCKETS = 12;                    // alpha groups: 12 fills, not ~1500
 
       let dpr = 1, w = 0, h = 0, gap = 34, radius = 0, cols = 0, rows = 0, ox = 0, oy = 0;
+      let rx = 0, ry = 0;                     // semi-axes of the field's footprint
       let sigma = 100, reach = 0;
 
       const smoothstep = (a, b, x) => {
@@ -1087,9 +1090,23 @@
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         gap = Math.max(30, Math.round(Math.sqrt((w * h) / 1500)));
-        radius = Math.min(w * 0.38, h * 0.46);
-        cols = Math.ceil((radius * 2) / gap) + 1;
-        rows = cols;
+
+        // The field is a circle on desktop and an upright ellipse at <=768px,
+        // where the section is tall and narrow and a circle leaves the page
+        // empty above and below it. Off mobile rx and ry are both `radius`,
+        // which is what keeps the desktop geometry exactly as it was.
+        if (storyNarrow.matches) {
+          rx = w * 0.42;
+          ry = h * 0.48;
+          radius = Math.max(rx, ry);
+        } else {
+          radius = Math.min(w * 0.38, h * 0.46);
+          rx = radius;
+          ry = radius;
+        }
+
+        cols = Math.ceil((rx * 2) / gap) + 1;
+        rows = Math.ceil((ry * 2) / gap) + 1;
         ox = w / 2 - ((cols - 1) * gap) / 2;
         oy = h / 2 - ((rows - 1) * gap) / 2;
         sigma = radius * 0.3;
@@ -1118,8 +1135,13 @@
           for (let ix = 0; ix < cols; ix++) {
             const x = ox + ix * gap;
 
-            const d = Math.hypot(x - cx, y - cy);
-            if (d > radius) continue;                   // circular boundary
+            // Distance normalised to the footprint: 1 exactly on its edge.
+            // When rx === ry === radius this is hypot(x-cx, y-cy) / radius, so
+            // `d` below is the plain distance and the test is `d > radius` —
+            // the desktop behaviour, unchanged.
+            const nd = Math.hypot((x - cx) / rx, (y - cy) / ry);
+            if (nd > 1) continue;                       // elliptical boundary
+            const d = nd * radius;
 
             let n = 0;
             for (let k = 0; k < PULSES; k++) {
