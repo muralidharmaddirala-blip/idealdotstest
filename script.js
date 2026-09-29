@@ -356,9 +356,20 @@
     // which makes the two gaps drift apart as the viewport height changes.
     // Adding X to the carousel's margin grows the lower gap by X and lifts the
     // whole block by X/2, hence the 2/3 correction.
+    // Mobile (<=768px) lays the hero out from CSS alone: the pin carries an
+    // equal top and bottom gap and centres its content between them, so the
+    // desktop balance below — which equalises the gaps either side of the copy
+    // by growing the carousel's margin — must not run there.
+    const heroNarrow = window.matchMedia('(max-width: 768px)');
+
     const balanceHero = () => {
       const nav = document.getElementById('siteHeader');
       if (!nav || !heroCards || !heroCopy) return;
+
+      // Hand the gap back to the stylesheet and leave. Clearing the inline
+      // value matters on a resize that crosses the breakpoint: without it the
+      // last desktop margin would stay stuck on the element.
+      if (heroNarrow.matches) { heroCards.style.marginTop = ''; return; }
 
       // Measure the untransformed layout. Both the copy and the carousel carry a
       // scroll transform, and measuring either while it is applied makes the
