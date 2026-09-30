@@ -2007,3 +2007,215 @@ section { padding: var(--space-section) 0; }
   }
   .svc-icon svg { width: 52%; height: 52%; }
 }
+
+/* ===================================================================
+   MOBILE ONLY (<= 768px) — stats band
+   =================================================================== */
+@media (max-width: 768px) {
+
+  /* Four equal cells rather than two rows of two that drift apart: the gaps
+     are closed and the division is drawn instead, with the same hairline the
+     services list uses between its rows. */
+  .stats-band {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 0;
+    column-gap: 0;
+  }
+
+  .stat {
+    padding: clamp(18px, 3vh, 28px) clamp(14px, 4vw, 22px);
+    border-left: 0;
+  }
+  /* The rules: one down the middle, one across it. Drawn on the second cell
+     of each row and on the second row, so no line lands on an outer edge. */
+  .stat:nth-child(even) {
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    padding-right: 0;
+  }
+  .stat:nth-child(odd) { padding-left: 0; }
+  .stat:nth-child(n + 3) { border-top: 1px solid rgba(255, 255, 255, 0.08); }
+
+  /* Figure first in the cell's hierarchy, label and note beneath it. */
+  .stat-label { font-size: clamp(0.6rem, 2.5vw, 0.7rem); }
+  .stat-value {
+    margin-top: clamp(8px, 1.2vh, 12px);
+    font-size: clamp(1.9rem, 9.4vw, 2.8rem);
+  }
+  .stat-note {
+    margin-top: clamp(7px, 1vh, 11px);
+    font-size: clamp(0.68rem, 2.9vw, 0.8rem);
+  }
+}
+
+/* ===================================================================
+   MOBILE ONLY (<= 768px) — gap between Work and Process
+   =================================================================== */
+@media (max-width: 768px) {
+  /* The rolling strip is the section's last element and the process track
+     below it carries no top padding of its own (it is a pinned scroll track),
+     so this padding alone is the gap between the two sections. The shared
+     --space-section bottoms out at 72px on a phone, which is more air than
+     the strip needs under it. */
+  .work { padding-bottom: clamp(28px, 4.6vh, 48px); }
+}
+
+/* ===================================================================
+   MOBILE ONLY (<= 768px) — process cards, stacked instead of in a row
+   The sequence itself (zoom, heading, split, turn) is driven from
+   script.js; these rules turn the stack through ninety degrees and lay
+   out the short, wide card that results.
+   =================================================================== */
+@media (max-width: 768px) {
+
+  .how-cards { flex-direction: column; }
+
+  /* Height is what script.js sets now, so the width comes from here. */
+  .how-card {
+    width: 100%;
+    height: auto;
+  }
+
+  /* The outer rounding follows the stack: the first card's top corners and
+     the last card's bottom ones, rather than left and right. */
+  .how-card:first-child .how-card__face {
+    border-radius: var(--outer-card-r) var(--outer-card-r) var(--card-r, 0px) var(--card-r, 0px);
+  }
+  .how-card:last-child .how-card__face {
+    border-radius: var(--card-r, 0px) var(--card-r, 0px) var(--outer-card-r) var(--outer-card-r);
+  }
+
+  /* The card turns about the horizontal axis, so its back has to be hung the
+     same way or it would arrive upside down. */
+  .how-card__face--back { transform: rotateX(180deg); }
+
+  /* Laid out as a grid rather than two columns side by side, so the number's
+     rule can run right across the box while the divider below it only spans
+     the text. The head's own box is dissolved with display:contents, which
+     promotes its three children — the number row, the name and the copy — to
+     cells of this grid; the markup is shared with desktop and stays as it is.
+
+       row 1 |  01 ──────────────────────────────  |   full width
+       row 2 |  Discover            │  RESEARCH    |
+       row 3 |  copy, four lines    │  …  BRIEF    |
+  */
+  .how-card__face--back {
+    --card-pad: clamp(13px, 3.8vw, 20px);
+    --card-rg: clamp(3px, 0.9vw, 5px);
+
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
+    align-content: start;
+    column-gap: clamp(13px, 3.6vw, 19px);
+    row-gap: var(--card-rg);
+    padding: var(--card-pad);
+  }
+  .how-card__head { display: contents; }
+
+  /* Across the whole box, stopping at the padding on either side. */
+  .how-card__top {
+    grid-area: 1 / 1 / 2 / 3;
+    align-items: center;
+    line-height: 1.2;
+    gap: clamp(8px, 2.4vw, 12px);
+
+    /* The number sits in its own band of air: the space beneath it, down to
+       the set below, matches the space above it, which is the padding. A grid
+       item's margin adds to the row gap, so this makes up the difference
+       between the two and nothing else on the card is disturbed. */
+    margin-bottom: calc(var(--card-pad) - var(--card-rg));
+  }
+  .how-card__num {
+    font-size: clamp(0.56rem, 2.3vw, 0.66rem);
+    line-height: 1.2;
+  }
+
+  .how-card__face--back h3 {
+    grid-area: 2 / 1 / 3 / 2;
+    font-size: clamp(0.88rem, 3.8vw, 1.12rem);
+    line-height: 1.04;
+  }
+
+  /* Four lines, and the column is sized so the longest copy falls in exactly
+     that many — -webkit-box is also what overrides the display:none it
+     carries from the 860px rule. */
+  .how-card__face--back p {
+    grid-area: 3 / 1 / 4 / 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    margin: 0;
+    font-size: clamp(0.62rem, 2.72vw, 0.74rem);
+    line-height: 1.32;
+  }
+
+  /* The words hold the second column from the name's top edge down to the
+     foot of the copy — rows two and three — and the rule is their left border,
+     so it starts below the number's line and no higher. space-between then
+     puts the first word on the name's top, the last on the copy's last line,
+     and the middle two at equal intervals between them. */
+  .how-card__tags {
+    grid-area: 2 / 2 / 4 / 3;
+    /* Wide enough for "Art direction", the longest of the sixteen, to stand
+       on one line — and wide enough that the copy beside it falls in four
+       lines on every phone rather than three on the larger ones. */
+    width: clamp(84px, 30vw, 132px);
+    justify-content: space-between;
+    padding: 0 0 0 clamp(13px, 3.6vw, 19px);
+    border-top: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+    gap: 0;
+    line-height: 1.3;
+    font-size: clamp(0.52rem, 2.2vw, 0.62rem);
+    letter-spacing: 0.08em;
+  }
+  .how-card__tags li:nth-child(n + 3) { display: block; }
+}
+
+/* Short frames leave the band room for only one or two lines of a paragraph
+   that wants five or six, and a fragment reads worse than nothing — so below
+   this the copy comes out altogether and the card is the number, the name and
+   the four words. Above it the copy fits whole, inside the four-line ceiling.
+   The padding comes back in too: a 73px band cannot carry both the open
+   padding and four words. */
+@media (max-width: 768px) and (max-height: 700px) {
+  .how-card__face--back p { display: none; }
+  .how-card__face--back { padding: clamp(11px, 3.2vw, 16px); }
+}
+/* On the shortest frames the band cannot hold four words on the open rhythm,
+   so the column tightens rather than dropping any of them. */
+@media (max-width: 768px) and (max-height: 620px) {
+  .how-card__tags {
+    line-height: 1;
+    font-size: clamp(0.5rem, 2.1vw, 0.58rem);
+  }
+}
+
+/* ===================================================================
+   MOBILE ONLY (<= 768px) — about section's dot box
+   It already stacks under the copy (and so under the Work With Us
+   button) from the 1024px rule; these rules only make it sit properly
+   at phone width.
+   =================================================================== */
+@media (max-width: 768px) {
+
+  /* Squared off to the same width as the copy above it. It was capped at
+     420px and centred, which left it narrower than the text and off its left
+     edge — the copy is left-aligned, so the box should start where it does. */
+  .about-visual {
+    max-width: none;
+    margin: 0;
+  }
+
+  /* The dots' padding and spacing were fixed pixels sized for the desktop
+     square; as shares of the box they keep the same proportions at any width
+     instead of crowding the dots into the middle. */
+  .about-dots {
+    gap: clamp(12px, 4.4vw, 22px);
+    padding: clamp(20px, 7vw, 40px);
+  }
+
+  /* The gap under the button, which --space-gutter bottoms out at 40px for. */
+  .about-inner { row-gap: clamp(26px, 5vh, 44px); }
+}

@@ -941,6 +941,15 @@
     const GAP_PX   = 16;
     const RADIUS   = 16;
 
+    // --- mobile ------------------------------------------------------------
+    // Same sequence, turned through ninety degrees. The picture is a portrait
+    // box instead of a landscape one, it reaches 1:2 at its largest, draws
+    // back to 1:1.75 as the heading arrives, and then breaks into four bands
+    // stacked down the frame rather than four columns across it.
+    const howNarrow = window.matchMedia('(max-width: 768px)');
+    const AR_MAX  = 2;      // height / width, at its largest
+    const AR_REST = 1.75;   // and once the heading is in
+
     const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
     const ramp = (a, b, x) => ease(Math.min(1, Math.max(0, (x - a) / (b - a))));
     const mix = (a, b, t) => a + (b - a) * t;
@@ -1104,26 +1113,61 @@
       const railL = rr.left - pinR.left + padL;
       const railW = Math.max(0, rr.width - padL - padR);
 
-      const fullW = railW;
-      const fullH = fullW / ASPECT;
-      const restH = Math.min(pinH * 0.49, fullH);
-      const zoomTo = restH / fullH;
+      const narrow = howNarrow.matches;
 
-      // One factor for width and height together, so the poster never squashes.
-      // It arrives at the size it will be when it splits, opens out to full
-      // width, and later comes back down to exactly that same size.
-      const k = mix(mix(zoomTo, 1, revealAt), zoomTo, zoomAt);
-      const zoomW = fullW * k;
-      const zoomH = fullH * k;
+      let bandW, bandH, footY, titleGap;
 
-      const bandW = mix(zoomW, railW, justAt);
-      const bandH = zoomH;
+      if (narrow) {
+        // The heading has to clear the fixed bar, so the picture gets whatever
+        // is left under it. Its width follows from that, because the ratio is
+        // the thing being held: on a frame too short for a full-width 1:2 box
+        // the box narrows rather than the ratio bending.
+        const navEl = document.getElementById('siteHeader');
+        const navH = navEl ? navEl.getBoundingClientRect().height : 76;
+        titleGap = Math.max(20, Math.min(40, pinH * 0.045));
+        const availH = Math.max(80, pinH - navH - titleGap - titleH - 16);
+        const w0 = Math.min(railW, availH / AR_MAX);
+
+        // The same two-step mix the desktop factor uses: the entrance opens it
+        // out to its largest, and the zoom draws it back — only here what
+        // changes is the ratio, from 1:2 to 1:1.75, at a width that holds.
+        const arNow = mix(mix(AR_REST, AR_MAX, revealAt), AR_REST, zoomAt);
+        bandW = w0;
+        bandH = w0 * arNow;
+
+        // At full size the picture is centred in the space below the bar: the
+        // region runs from the bar's lower edge to the foot of the frame, and
+        // the air above the picture equals the air below it.
+        //
+        // That foot is then the anchor for everything after. The picture hangs
+        // from it, so as it draws back from 1:2 to 1:1.75 the bottom edge does
+        // not move and the room it gives up opens above — which is where the
+        // heading arrives, on the same scroll, at title.style.opacity = zoomAt.
+        footY = navH + (pinH - navH + w0 * AR_MAX) / 2;
+      } else {
+        const fullW = railW;
+        const fullH = fullW / ASPECT;
+        const restH = Math.min(pinH * 0.49, fullH);
+        const zoomTo = restH / fullH;
+
+        // One factor for width and height together, so the poster never
+        // squashes. It arrives at the size it will be when it splits, opens out
+        // to full width, and later comes back down to exactly that same size.
+        const k = mix(mix(zoomTo, 1, revealAt), zoomTo, zoomAt);
+        const zoomW = fullW * k;
+        const zoomH = fullH * k;
+
+        bandW = mix(zoomW, railW, justAt);
+        bandH = zoomH;
+        titleGap = Math.max(32, Math.min(72, pinH * 0.08));
+
+        // The picture is hung from its foot. At full size it sits centred; as
+        // it shrinks the bottom edge stays exactly where it was, so the room it
+        // gives up opens above it — which is where the heading then arrives.
+        footY = pinH / 2 + fullH / 2;
+      }
 
       const cx = railL + railW / 2;
-      // The picture is hung from its foot. At full size it sits centred; as it
-      // shrinks the bottom edge stays exactly where it was, so the room it gives
-      // up opens above it — which is where the heading then arrives.
-      const footY = pinH / 2 + fullH / 2;
       cards.style.left = (cx - bandW / 2).toFixed(1) + 'px';
       cards.style.top = (footY - bandH).toFixed(1) + 'px';
       cards.style.width = bandW.toFixed(1) + 'px';
@@ -1136,7 +1180,6 @@
       // fills the frame the heading is above the top of it, out of sight, and it
       // descends into place exactly as the picture draws back. It reaches its
       // final state at the moment the picture reaches its final size.
-      const titleGap = Math.max(32, Math.min(72, pinH * 0.08));
       const titleTop = footY - bandH - titleGap - titleH;
 
       title.style.left = railL.toFixed(1) + 'px';
@@ -1145,27 +1188,68 @@
       title.style.opacity = zoomAt.toFixed(3);
       title.style.transform = 'scale(' + mix(0.96, 1, zoomAt).toFixed(4) + ')';
 
-      const gap = GAP_PX * splitAt;
-      const cardW = (bandW - gap * (N - 1)) / N;
+      // Stacked, the cards need less air between them than four columns do,
+      // and the height it gives back is what lets each band carry its padding,
+      // its heading and four lines of copy.
+      const gap = (narrow ? 10 : GAP_PX) * splitAt;
       cards.style.gap = gap.toFixed(2) + 'px';
-
-      // Sized to the band it currently spans, so the four slices always add back
-      // up to one continuous picture. The width is what has to match, so the
-      // picture keeps its own shape and is hung from the top — whatever extra
-      // height that leaves simply runs off the bottom of the cards.
-      const imgW = bandW;
-      const imgH = imgW / shotAspect;
-      const imgY = 0;
       const deg = (180 * flipAt).toFixed(2) + 'deg';
+      // Stacked cards turn about the horizontal axis — top edge over bottom —
+      // which is the way the stack itself runs. In a row it is the vertical
+      // axis, as before.
+      const turn = narrow ? 'rotateX(' : 'rotateY(';
 
-      for (let i = 0; i < N; i++) {
-        cardEls[i].style.width = cardW.toFixed(2) + 'px';
-        cardEls[i].style.setProperty('--card-r', (RADIUS * splitAt).toFixed(1) + 'px');
-        cardEls[i].style.setProperty('--edge', (0.16 * splitAt).toFixed(3));
-        inners[i].style.transform = 'rotateY(' + deg + ')';
-        shots[i].style.backgroundSize = imgW.toFixed(1) + 'px ' + imgH.toFixed(1) + 'px';
-        shots[i].style.backgroundPosition =
-          (-(i * (cardW + gap))).toFixed(1) + 'px ' + imgY.toFixed(1) + 'px';
+      if (narrow) {
+        // Four bands down the frame instead of four columns across it. The
+        // gaps are taken out of the bands, as they are on desktop, so the
+        // stack keeps the box it had and its top edge never moves.
+        const sliceH = (bandH - gap * (N - 1)) / N;
+
+        // The picture covers the box and is then cut across. Cover rather than
+        // fit, because a landscape picture in a portrait box would otherwise
+        // leave the bands part empty; the sides are cropped and the four
+        // pieces still read as one continuous image.
+        let imgW, imgH;
+        if (bandW / bandH > shotAspect) {
+          imgW = bandW;
+          imgH = bandW / shotAspect;
+        } else {
+          imgH = bandH;
+          imgW = bandH * shotAspect;
+        }
+        const imgX = (bandW - imgW) / 2;   // centred on the crop
+
+        for (let i = 0; i < N; i++) {
+          cardEls[i].style.width = '';     // the stylesheet makes it full width
+          cardEls[i].style.height = sliceH.toFixed(2) + 'px';
+          cardEls[i].style.setProperty('--card-r', (RADIUS * splitAt).toFixed(1) + 'px');
+          cardEls[i].style.setProperty('--edge', (0.16 * splitAt).toFixed(3));
+          inners[i].style.transform = turn + deg + ')';
+          shots[i].style.backgroundSize = imgW.toFixed(1) + 'px ' + imgH.toFixed(1) + 'px';
+          shots[i].style.backgroundPosition =
+            imgX.toFixed(1) + 'px ' + (-(i * (sliceH + gap))).toFixed(1) + 'px';
+        }
+      } else {
+        const cardW = (bandW - gap * (N - 1)) / N;
+
+        // Sized to the band it currently spans, so the four slices always add
+        // back up to one continuous picture. The width is what has to match, so
+        // the picture keeps its own shape and is hung from the top — whatever
+        // extra height that leaves simply runs off the bottom of the cards.
+        const imgW = bandW;
+        const imgH = imgW / shotAspect;
+        const imgY = 0;
+
+        for (let i = 0; i < N; i++) {
+          cardEls[i].style.width = cardW.toFixed(2) + 'px';
+          cardEls[i].style.height = '';
+          cardEls[i].style.setProperty('--card-r', (RADIUS * splitAt).toFixed(1) + 'px');
+          cardEls[i].style.setProperty('--edge', (0.16 * splitAt).toFixed(3));
+          inners[i].style.transform = turn + deg + ')';
+          shots[i].style.backgroundSize = imgW.toFixed(1) + 'px ' + imgH.toFixed(1) + 'px';
+          shots[i].style.backgroundPosition =
+            (-(i * (cardW + gap))).toFixed(1) + 'px ' + imgY.toFixed(1) + 'px';
+        }
       }
     }
 
