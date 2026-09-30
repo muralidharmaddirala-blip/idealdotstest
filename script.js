@@ -513,10 +513,14 @@
     // while still overlapping enough to read as one movement — and rises this
     // far into place. The run's LENGTH is not set here: it is worked out from
     // the rise so each row moves at the halving's rate (see below).
-    const ENTER_SPAN = 0.4;
+    // Narrower slices make the run longer without touching the rate: each row
+    // still rises ENTER_RISE at the halving's pace, there is just more of the
+    // track between one starting and the next. That is the only lever that
+    // slows the cascade down and leaves the rates matched.
+    const ENTER_SPAN = 0.25;
     const ENTER_RISE = 34;
-    const M_HOLD = 0.02;         // breath between one movement and the next
-    const M_TAIL = 0.03;         // full-screen card before the pin lets go
+    const M_HOLD = 0.015;        // breath between one movement and the next
+    const M_TAIL = 0.02;         // full-screen card before the pin lets go
     // Stacked, the rows size themselves from their content and the list is as
     // tall as that makes it — free to run past the foot of the frame. On the
     // next scroll it slides up behind the halved image and fades out over the
@@ -524,6 +528,7 @@
     // Mobile's windows are all derived — see the block in paintSvc. Nothing
     // about the order is authored beyond the halving itself.
     let mPanelH = 0;             // the list's measured height, read once a frame
+    let mPerP = 0;               // the halving's pace, in px per unit of p
     // A row starts dimming this many of its own heights before the image's
     // edge actually reaches it, so it is seen fading rather than just being
     // covered up.
@@ -661,8 +666,10 @@
         const dExpand = Math.max(1, pinH - edge0);
         const span = (SPLIT[1] - SPLIT[0]) * (dExpand / dHalve);
 
-        // The pace the halving sets, in px of movement per unit of p.
+        // The pace the halving sets, in px of movement per unit of p. Kept on
+        // the outer scope: the list's drift through the expand needs it too.
         const perP = dHalve / (SPLIT[1] - SPLIT[0]);
+        mPerP = perP;
 
         // The list begins where the halving ends — no gap, so the card
         // settling at half and the first row arriving are one continuous
@@ -725,12 +732,15 @@
         panelH = null;
         const actual = mPanelH || Math.max(1, pinH - panelY);
 
-        // Travel is exactly the part hanging past the frame, so it ends with
-        // the list's last row resting on the foot of the frame and then holds
-        // there — track() clamps at 1, so the expand that follows leaves the
-        // list where it stopped.
+        // Two stages. The run brings the list's last row down onto the foot of
+        // the frame — that is where the expand is timed to begin. From there
+        // it carries on climbing, behind the growing card, for as long as the
+        // expand lasts; the drift is the same distance the expand itself
+        // covers, so the list rises at the rate everything else moves at.
         const overrun = Math.max(0, panelY + actual - pinH);
-        panelShift = -overrun * track(W_TRAVEL[0], W_TRAVEL[1], p);
+        const drift = mPerP * (EXP[1] - EXP[0]);
+        panelShift = -(overrun * track(W_TRAVEL[0], W_TRAVEL[1], p) +
+                       drift * track(EXP[0], EXP[1], p));
       } else {
         // Side by side. Only the width changes: the left edge stays on the
         // rail so the image never crosses the margin the nav and every other
