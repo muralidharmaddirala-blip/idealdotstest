@@ -1943,3 +1943,60 @@ section { padding: var(--space-section) 0; }
   }
   .story-line { font-size: var(--story-fz); }
 }
+
+/* ===================================================================
+   MOBILE ONLY (<= 768px) — services list, stacked under the image
+   The boxes are driven from script.js; these rules set the list's own design:
+   what size each level of text is, and how tightly the rows sit.
+   =================================================================== */
+@media (max-width: 768px) {
+
+  /* Behind the image, not in front of it: the list runs up under the halved
+     picture as it leaves, so it has to sit below it in the stack. The
+     statement stays on top of both. */
+  .svc-panel { z-index: 0; }
+
+  /* The rows measured themselves against the panel's height and split it six
+     ways, which is what spread them so far apart. At this width they size to
+     their own content instead and the list is as tall as that makes it —
+     free to run past the foot of the frame. */
+  .svc-list { flex: 0 0 auto; gap: 0; }
+  .svc-item {
+    flex: 0 0 auto;
+    padding: clamp(11px, 1.5vh, 15px) 0;
+    border-radius: 0;
+    column-gap: clamp(11px, 3vw, 15px);
+  }
+  /* A hairline separates them, so the rows can sit close together and still
+     read as a list rather than a column of loose blocks. */
+  .svc-item + .svc-item { border-top: 1px solid rgba(255, 255, 255, 0.08); }
+
+  /* Three clear levels: the amber label is the smallest thing on screen, the
+     title carries the row, the description sits under it a third smaller and
+     dimmer. Each step is a visible drop in size, weight and contrast. */
+  .svc-eyebrow {
+    margin-bottom: clamp(12px, 1.8vh, 18px);
+    font-size: 0.66rem;
+    letter-spacing: 0.28em;
+  }
+  .svc-item h3 {
+    font-size: clamp(1rem, 4.4vw, 1.18rem);
+    line-height: 1.15;
+  }
+  .svc-item p {
+    display: block;
+    margin: 0.3em 0 0;
+    max-width: none;
+    font-size: clamp(0.72rem, 3.1vw, 0.82rem);
+    line-height: 1.4;
+  }
+
+  /* Matched to the height of the two lines of text beside it, so the icon and
+     the words read as one unit instead of the tile dominating the row. */
+  .svc-icon {
+    width: clamp(30px, 8.6vw, 38px);
+    height: clamp(30px, 8.6vw, 38px);
+    border-radius: 10px;
+  }
+  .svc-icon svg { width: 52%; height: 52%; }
+}
