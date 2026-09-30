@@ -1963,9 +1963,11 @@ section { padding: var(--space-section) 0; }
   .svc-list { flex: 0 0 auto; gap: 0; }
   .svc-item {
     flex: 0 0 auto;
-    padding: clamp(11px, 1.5vh, 15px) 0;
+    /* Kept modest on purpose: the row's height comes from the icon and the two
+       lines of text, not from air around them. */
+    padding: clamp(12px, 1.6vh, 16px) 0;
     border-radius: 0;
-    column-gap: clamp(11px, 3vw, 15px);
+    column-gap: clamp(12px, 3.4vw, 17px);
   }
   /* A hairline separates them, so the rows can sit close together and still
      read as a list rather than a column of loose blocks. */
@@ -1974,29 +1976,34 @@ section { padding: var(--space-section) 0; }
   /* Three clear levels: the amber label is the smallest thing on screen, the
      title carries the row, the description sits under it a third smaller and
      dimmer. Each step is a visible drop in size, weight and contrast. */
+  /* It now animates in with the rows, so it wants the same hint they carry. */
   .svc-eyebrow {
-    margin-bottom: clamp(12px, 1.8vh, 18px);
-    font-size: 0.66rem;
+    will-change: opacity, transform;
+    margin-bottom: clamp(14px, 2.2vh, 22px);
+    font-size: clamp(0.82rem, 3.7vw, 1rem);
     letter-spacing: 0.28em;
   }
   .svc-item h3 {
-    font-size: clamp(1rem, 4.4vw, 1.18rem);
+    font-size: clamp(1.12rem, 5.1vw, 1.4rem);
     line-height: 1.15;
   }
   .svc-item p {
     display: block;
     margin: 0.3em 0 0;
     max-width: none;
-    font-size: clamp(0.72rem, 3.1vw, 0.82rem);
+    font-size: clamp(0.78rem, 3.4vw, 0.92rem);
     line-height: 1.4;
   }
 
   /* Matched to the height of the two lines of text beside it, so the icon and
      the words read as one unit instead of the tile dominating the row. */
+  /* The tile now sets the row's height, and the row count follows from that:
+     six rows this tall cannot fit the gap under the halved card, which is what
+     leaves the last two below the frame. */
   .svc-icon {
-    width: clamp(30px, 8.6vw, 38px);
-    height: clamp(30px, 8.6vw, 38px);
-    border-radius: 10px;
+    width: clamp(44px, 14.8vw, 64px);
+    height: clamp(44px, 14.8vw, 64px);
+    border-radius: clamp(12px, 3.7vw, 17px);
   }
   .svc-icon svg { width: 52%; height: 52%; }
 }
