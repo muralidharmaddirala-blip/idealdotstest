@@ -2224,11 +2224,14 @@ section { padding: var(--space-section) 0; }
    MOBILE ONLY (<= 768px) — footer spacing
    =================================================================== */
 @media (max-width: 768px) {
-  /* The space under the mail box, down to the rule, is made to match the
-     space above the logo, which is the footer's own top padding.
-     Under the form sit two fixed amounts before the padding even starts: the
-     status line's 16px top margin and the 20px it reserves for a message.
-     The padding therefore supplies only what is left of --space-band —
-     16px + 20px + 16px = 52px, the same as above the logo. */
-  .footer-grid { padding-bottom: calc(var(--space-band) - 36px); }
+  /* The space under the mail box, down to the rule. Three things make it up:
+     the status line's top margin, the 20px it reserves for a message, and the
+     grid's padding beneath that.
+     Trimmed twice now, 52px -> 44px -> 36px. The second 8px could not come
+     from the padding, which was already down to 8px, so it comes off the
+     status line's margin instead — the 20px reserve is left alone, because
+     cutting that would make the footer jump further when a message lands.
+     The space above the logo is untouched at 52px. */
+  .footer-grid { padding-bottom: clamp(6px, 2vw, 12px); }
+  .footer-newsletter .form-status { margin-top: 8px; }
 }
