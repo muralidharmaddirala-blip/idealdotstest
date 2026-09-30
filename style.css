@@ -2219,3 +2219,16 @@ section { padding: var(--space-section) 0; }
   /* The gap under the button, which --space-gutter bottoms out at 40px for. */
   .about-inner { row-gap: clamp(26px, 5vh, 44px); }
 }
+
+/* ===================================================================
+   MOBILE ONLY (<= 768px) — footer spacing
+   =================================================================== */
+@media (max-width: 768px) {
+  /* The space under the mail box, down to the rule, is made to match the
+     space above the logo, which is the footer's own top padding.
+     Under the form sit two fixed amounts before the padding even starts: the
+     status line's 16px top margin and the 20px it reserves for a message.
+     The padding therefore supplies only what is left of --space-band —
+     16px + 20px + 16px = 52px, the same as above the logo. */
+  .footer-grid { padding-bottom: calc(var(--space-band) - 36px); }
+}
