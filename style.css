@@ -1955,9 +1955,10 @@ section { padding: var(--space-section) 0; }
    =================================================================== */
 @media (max-width: 768px) {
 
-  /* Behind the image, not in front of it: the list runs up under the halved
-     picture as it leaves, so it has to sit below it in the stack. The
-     statement stays on top of both. */
+  /* The list no longer passes under the picture — the two climb together and
+     keep the gap they were given, so they never overlap and the order here is
+     only belt and braces. Left below the image so that if a sub-pixel ever
+     brought them together it would be the picture in front, as before. */
   .svc-panel { z-index: 0; }
 
   /* The rows measured themselves against the panel's height and split it six

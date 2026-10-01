@@ -565,7 +565,8 @@
     const ENTER_SPAN = 0.25;
     const ENTER_RISE = 34;
     const M_HOLD = 0.015;        // breath between one movement and the next
-    const M_TAIL = 0.02;         // full-screen card before the pin lets go
+    const M_LEAD = 0.06;         // approach before the halving starts
+    const M_TAIL = 0.03;         // the finished layout, held, before it lets go
     // Stacked, the rows size themselves from their content and the list is as
     // tall as that makes it — free to run past the foot of the frame. On the
     // next scroll it slides up behind the halved image and fades out over the
@@ -573,12 +574,13 @@
     // Mobile's windows are all derived — see the block in paintSvc. Nothing
     // about the order is authored beyond the halving itself.
     let mPanelH = 0;             // the list's measured height, read once a frame
-    let mPerP = 0;               // the halving's pace, in px per unit of p
-    // A row starts dimming this many of its own heights before the image's
-    // edge actually reaches it, so it is seen fading rather than just being
-    // covered up.
-    const FADE_LEAD = 0.8;
-
+    let mOverrun = 0;            // how far the list hangs below the frame
+    // Where the expand begins under the window currently in force. Desktop's
+    // is fixed; mobile has no expand at all, so the figure it gets is past the
+    // end of the track and the image cycles throughout. Gating this on the
+    // desktop constant stopped the posters cycling halfway down the mobile
+    // sequence, for an expand that is no longer there.
+    let expandFrom = EXPAND[0];
     const svcNarrow = window.matchMedia('(max-width: 768px)');
     const IDLE_WAIT = 1400;    // stillness before the images start cycling
     const CYCLE_GAP = 2200;    // how long each one holds
@@ -615,7 +617,7 @@
     const startCycle = () => {
       if (cycleTimer) return;
       // Only once the whole list has formed, and never during the expand.
-      if (!(settled && lastP < EXPAND[0])) return;
+      if (!(settled && lastP < expandFrom)) return;
       cycleIdx = shown;
       cycleTimer = window.setInterval(() => {
         cycleIdx = (cycleIdx + 1) % shots.length;
@@ -695,60 +697,73 @@
       // Leaving upwards entirely resets it, so returning replays the sequence
       // from the opening statement.
       // The windows the sequence runs to. Desktop uses the authored ones.
-      let W_LIST = LIST_IN, W_TRAVEL = null, EXP = EXPAND;
-      // Share of the expand at which the image has reached 80% of the frame.
-      let CLEAR_BY = 1;
+      let W_SPLIT = SPLIT, W_LIST = LIST_IN, W_TRAVEL = null, EXP = EXPAND;
 
       if (svcNarrow.matches) {
-        // The halving lifts the image's lower edge by half the block; the
-        // expand drops that same edge to the foot of the frame. For the two to
-        // move at one rate, each needs scroll in proportion to its own
-        // distance — so the expand's span is the halving's, scaled by the ratio
-        // between them. It comes out near 1.12x on every phone, but it is
-        // measured rather than assumed because the block's height is not.
-        const edge0 = imgT + imgH * V_SHARE;      // the halved image's lower edge
-        const dHalve = imgH * (1 - V_SHARE);
-        const dExpand = Math.max(1, pinH - edge0);
-        const span = (SPLIT[1] - SPLIT[0]) * (dExpand / dHalve);
-
-        // The pace the halving sets, in px of movement per unit of p. Kept on
-        // the outer scope: the list's drift through the expand needs it too.
-        const perP = dHalve / (SPLIT[1] - SPLIT[0]);
-        mPerP = perP;
-
-        // The list begins where the halving ends — no gap, so the card
-        // settling at half and the first row arriving are one continuous
-        // movement. Each row rises ENTER_RISE, and to do that at the halving's
-        // rate its own slice needs ENTER_RISE / perP of the track; the slices
-        // are ENTER_SPAN of the whole run, so the run is that much longer
-        // again. Capped, so an unusually short frame cannot swallow the track.
-        const sForm = Math.min(0.22, (ENTER_RISE / ENTER_SPAN) / perP);
-        W_LIST = [SPLIT[1], SPLIT[1] + sForm];
-
-        // The list's run up behind the card, from what the panel measures.
+        // How far the list hangs below the frame — the distance the block has
+        // to climb for its last row to reach the foot of it.
         const pTop = imgT + imgH * V_SHARE + imgH * V_GAP;
+
+        // Four times the room that sits under the last row's icon, measured
+        // down to the rule that closes the section off.
+        // What is already there is the row's own bottom padding plus however
+        // far the icon falls short of the text beside it — the icon is centred
+        // against that text, so when the text is the taller of the two there
+        // is a little space beneath it. Three times that again is added below
+        // the list, which brings the total to four.
+        // Measured rather than worked out in the stylesheet: how far the icon
+        // falls short depends on where the last row's description wraps, which
+        // CSS cannot know. The row's own height does not include this padding,
+        // so reading it back cannot feed on itself. Set before the panel is
+        // measured, so its height — and with it the climb — takes it in.
+        if (items.length) {
+          const lastRow = items[items.length - 1];
+          const lastIcon = lastRow.querySelector('.svc-icon');
+          if (lastIcon) {
+            const under = lastRow.offsetHeight -
+                          (lastIcon.offsetTop + lastIcon.offsetHeight);
+            panel.style.paddingBottom = Math.max(0, under * 3).toFixed(1) + 'px';
+          }
+        }
+
         mPanelH = panel.offsetHeight || Math.max(1, pinH - pTop);
-        const overrunPx = Math.max(0, pTop + mPanelH - pinH);
+        mOverrun = Math.max(0, pTop + mPanelH - pinH);
 
-        // That run wants the same rate again. Where the track has room for it
-        // it gets it; on a short frame there is not enough left once the other
-        // three have taken theirs, so it takes what remains rather than
-        // running the sequence off the end of the section.
-        const room = 1 - SPLIT[1] - sForm - 2 * M_HOLD - span - M_TAIL;
-        const sTravel = Math.max(0.04, Math.min(overrunPx / perP, room));
+        // Three movements, and all three distances are known: the image's
+        // lower edge rising half the block, the rows coming up, and the block
+        // climbing until the list rests on the foot of the frame. So the track
+        // is divided between them in proportion to those distances, in one
+        // step — which puts them all at a single rate and uses the whole
+        // track, leaving neither a movement cut short at the end nor a
+        // screenful of dead scroll after the last one.
+        const dHalve = imgH * (1 - V_SHARE);
+        const dForm = ENTER_RISE / ENTER_SPAN;   // the run's own travel
+        const dClimb = mOverrun;
+        const total = Math.max(1, dHalve + dForm + dClimb);
+        const budget = 1 - M_LEAD - 2 * M_HOLD - M_TAIL;
 
-        // Everything after the list follows in order, each behind a breath.
+        const sSplit = budget * (dHalve / total);
+        const sForm = budget * (dForm / total);
+        const sTravel = budget * (dClimb / total);
+
+        W_SPLIT = [M_LEAD, M_LEAD + sSplit];
+        // No gap after the halving: the card settling at half and the first row
+        // coming up read as one movement.
+        W_LIST = [W_SPLIT[1], W_SPLIT[1] + sForm];
         W_TRAVEL = [W_LIST[1] + M_HOLD, W_LIST[1] + M_HOLD + sTravel];
-        EXP = [W_TRAVEL[1] + M_HOLD,
-               Math.min(1, W_TRAVEL[1] + M_HOLD + span)];
 
-        // Where along that run the edge crosses four fifths of the frame.
-        CLEAR_BY = Math.min(1, Math.max(0.05, (0.8 * pinH - edge0) / dExpand));
+        // Nothing expands. Putting the window past the end of the track is how
+        // that is said here: track() clamps, so `expand` stays 0 throughout
+        // and every line downstream that reads it leaves its box alone.
+        EXP = [2, 3];
+      } else if (panel.style.paddingBottom) {
+        panel.style.paddingBottom = '';   // desktop pins the panel's height
       }
 
       if (rect.top >= window.innerHeight) settled = false;
       if (p >= W_LIST[1]) settled = true;
-      const split = settled ? 1 : track(SPLIT[0], SPLIT[1], p);
+      const split = settled ? 1 : track(W_SPLIT[0], W_SPLIT[1], p);
+      expandFrom = EXP[0];
       const expand = track(EXP[0], EXP[1], p);
 
       // The split resolved to four boxes, so the two layouts differ only in
@@ -757,7 +772,10 @@
       let mediaX, mediaW, mediaY, mediaH;   // the image through the halving
       let panelX, panelW, panelY, panelH;   // where the list settles
 
-      let panelShift = 0;                   // how far the list has travelled up
+      // On mobile the image and the list travel together as one block, so this
+      // is applied to both; on desktop it stays 0 and only the panel's own
+      // entrance transform is in play.
+      let groupShift = 0;
 
       if (svcNarrow.matches) {
         // Stacked. Full rail width throughout; the height is what halves, so
@@ -775,17 +793,13 @@
         // is exactly as tall as its content and may overrun the frame. Its
         // measurement was already taken when the windows were built.
         panelH = null;
-        const actual = mPanelH || Math.max(1, pinH - panelY);
 
-        // Two stages. The run brings the list's last row down onto the foot of
-        // the frame — that is where the expand is timed to begin. From there
-        // it carries on climbing, behind the growing card, for as long as the
-        // expand lasts; the drift is the same distance the expand itself
-        // covers, so the list rises at the rate everything else moves at.
-        const overrun = Math.max(0, panelY + actual - pinH);
-        const drift = mPerP * (EXP[1] - EXP[0]);
-        panelShift = -(overrun * track(W_TRAVEL[0], W_TRAVEL[1], p) +
-                       drift * track(EXP[0], EXP[1], p));
+        // The block climbs until the list's last row rests on the foot of the
+        // frame, bringing the rest of the list up into view. The image goes
+        // with it rather than the list passing behind — so the two stay the
+        // one piece they were when the list formed, and the image simply
+        // leaves the top of the frame as the list arrives.
+        groupShift = -mOverrun * track(W_TRAVEL[0], W_TRAVEL[1], p);
       } else {
         // Side by side. Only the width changes: the left edge stays on the
         // rail so the image never crosses the margin the nav and every other
@@ -805,7 +819,7 @@
 
       media.style.left = mix(mediaX, 0, expand).toFixed(1) + 'px';
       media.style.width = mix(mediaW, pinW, expand).toFixed(1) + 'px';
-      media.style.top = mTop.toFixed(1) + 'px';
+      media.style.top = (mTop + groupShift).toFixed(1) + 'px';
       media.style.height = mHgt.toFixed(1) + 'px';
       media.style.borderRadius = (RADIUS * (1 - expand)).toFixed(1) + 'px';
       // The fade-in belongs to the first approach only; once the layout is
@@ -816,7 +830,7 @@
       const gone = settled ? 1 : ramp(INTRO_OUT[0], INTRO_OUT[1], p);
       intro.style.left = mediaX.toFixed(1) + 'px';
       intro.style.width = mediaW.toFixed(1) + 'px';
-      intro.style.top = mediaY.toFixed(1) + 'px';
+      intro.style.top = (mediaY + groupShift).toFixed(1) + 'px';
       intro.style.height = mediaH.toFixed(1) + 'px';
       intro.style.opacity = ((1 - gone) * enter).toFixed(3);
       // The wash carries the white statement; it thins out as the image halves
@@ -831,19 +845,11 @@
       const formed = settled ? 1
         : svcNarrow.matches ? track(W_LIST[0], W_LIST[1], p)
                             : ramp(W_LIST[0], W_LIST[1], p);
-      // Stacked, the list leaves on the same scroll that carries it upward, so
-      // it dissolves behind the halved image rather than waiting for the
-      // expand. By the time the image starts growing it has already gone.
-      // Two fades run together on mobile. Each row still leaves on its own as
-      // the image's edge passes it (below), which is the top-to-bottom sweep;
-      // over that, the panel as a whole fades, and it is timed to be gone by
-      // the moment the image has covered four fifths of the frame — so nothing
-      // is left standing for the last stretch of the expand however far down
-      // the sweep has reached. Smoothstepped rather than linear so it settles
-      // out instead of stopping dead.
-      const panelOut = svcNarrow.matches
-        ? smooth(EXP[0], EXP[0] + (EXP[1] - EXP[0]) * CLEAR_BY, p)
-        : track(EXP[0], EXP[0] + 0.06, p);
+      // Nothing fades the block out any more: with the image and the list
+      // travelling together there is no expand to clear it for, and the
+      // section simply scrolls away when the pin lets go. Desktop still
+      // clears it as the image opens out.
+      const panelOut = svcNarrow.matches ? 0 : track(EXP[0], EXP[0] + 0.06, p);
       const panelIn = formed * (1 - panelOut);
       panel.style.left = panelX.toFixed(1) + 'px';
       panel.style.width = panelW.toFixed(1) + 'px';
@@ -853,48 +859,35 @@
       panel.style.height = panelH === null ? '' : panelH.toFixed(1) + 'px';
       panel.style.opacity = panelIn.toFixed(3);
       // Off mobile the block rises as one. On mobile each row carries its own
-      // rise (below), so the panel only holds the travel.
+      // entrance rise (below), so the panel holds only the group's climb —
+      // the same shift the image is given, which is what keeps them together.
       const panelRise = svcNarrow.matches ? 0 : (1 - formed) * 30;
-      panel.style.transform = 'translateY(' + (panelRise + panelShift).toFixed(1) + 'px)';
+      panel.style.transform = 'translateY(' + (panelRise + groupShift).toFixed(1) + 'px)';
       panel.style.pointerEvents = panelIn < 0.6 ? 'none' : '';
 
-      // --- who has left, and who is still standing ---
+      // --- the rows arriving ---
       if (svcNarrow.matches) {
-        // One rule covers both movements, because both are the same event seen
-        // from different sides: a row goes when the image's lower edge passes
-        // it. Through the travel that edge is still and the rows run up into
-        // it, so they leave in order, heading first. Through the expand the
-        // rows are still and the edge sweeps down them, so they leave top to
-        // bottom. Measured live, so it holds whatever the rows came out to be.
-        const coverY = mTop + mHgt;
-        const panelTop = panelY + panelShift;
-
-        // Each element's slice of the formation. The slices overlap by
-        // (1 - ENTER_SPAN), so one is always arriving as the last settles.
+        // Only an entrance now. The rows used to fade as the image's lower
+        // edge passed them, because the list ran up behind it; the block
+        // travels as one piece instead, so nothing passes behind anything and
+        // there is nothing to fade out — the rows come up, and then scroll
+        // away with the section.
         const step = fadeEls.length > 1
           ? (1 - ENTER_SPAN) / (fadeEls.length - 1)
           : 0;
 
         for (let i = 0; i < fadeEls.length; i++) {
           const el = fadeEls[i];
-          const elH = el.offsetHeight || 1;
 
-          // Arriving: this element's own progress through its slice. It comes
-          // up into place from ENTER_RISE below, fading as it rises, and the
-          // last of them lands exactly as the card reaches half height.
+          // This element's own slice of the formation. It comes up into place
+          // from ENTER_RISE below, fading as it rises, and the last of them
+          // lands as the card reaches half height. The slices overlap by
+          // (1 - ENTER_SPAN), so one is always arriving as the last settles.
           const li = Math.min(1, Math.max(0, (formed - i * step) / ENTER_SPAN));
           const rise = (1 - li) * ENTER_RISE;   // linear: one steady rate
           const into = li * li * (3 - 2 * li);  // smoothed: the fade only
 
-          // Leaving: how far the image's lower edge, plus its lead, has come
-          // past this row's top — measured where the row actually is, rise
-          // included, so the two movements cannot disagree about that.
-          const elTop = panelTop + el.offsetTop + rise;
-          const band = elH * (1 + FADE_LEAD);
-          const f = Math.min(1, Math.max(0, (coverY + elH * FADE_LEAD - elTop) / band));
-          const outOf = 1 - f * f * (3 - 2 * f);
-
-          el.style.opacity = (into * outOf).toFixed(3);
+          el.style.opacity = into.toFixed(3);
           el.style.transform = rise > 0.01 ? 'translateY(' + rise.toFixed(1) + 'px)' : '';
         }
         staggered = true;
@@ -1455,20 +1448,17 @@
         // where the section is tall and narrow and a circle leaves the page
         // empty above and below it. Off mobile rx and ry are both `radius`,
         // which is what keeps the desktop geometry exactly as it was.
-        if (storyNarrow.matches) {
-          rx = w * 0.42;
-          // Upright, but held to one and four fifths of its width. The band is
-          // a full screen tall now, and a straight share of that height would
-          // draw the field out to three times its width; this keeps the shape
-          // it had when the band was shorter and leaves it centred in the
-          // taller one rather than smeared down it.
-          ry = Math.min(h * 0.48, rx * 1.8);
-          radius = Math.max(rx, ry);
-        } else {
-          radius = Math.min(w * 0.38, h * 0.46);
-          rx = radius;
-          ry = radius;
-        }
+        // Circular on both, and the two differ only in how the radius is
+        // chosen. On mobile it is the size that suits the band's height, and
+        // the width is not allowed to pull it in — the field simply runs off
+        // both sides of a narrow frame and is clipped there. That is what
+        // keeps it a circle: holding the horizontal radius to the frame while
+        // the vertical one followed the band is what drew it into an ellipse.
+        radius = storyNarrow.matches
+          ? Math.min(h * 0.48, w * 0.756)
+          : Math.min(w * 0.38, h * 0.46);
+        rx = radius;
+        ry = radius;
 
         cols = Math.ceil((rx * 2) / gap) + 1;
         rows = Math.ceil((ry * 2) / gap) + 1;
