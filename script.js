@@ -295,25 +295,27 @@
     carousel.addEventListener('pointerleave', () => { hovered = -1; });
 
     /* Swipe to spin: direction and speed both come from the gesture. */
-    // Locked at phone width. A finger travelling up the screen to reach the
-    // next section is never perfectly vertical, and the few pixels of sideways
-    // drift were enough to spin the ring by hand — then `fling` carried that
-    // nudge on after the finger left, which is what read as the carousel
-    // twitching as you scrolled past it. Nothing else changes: the rotation
-    // that follows the scroll (DEG_PER_PX) and the idle drift (SPEED) are
-    // untouched, so the cards still turn as they do now, and a tap still
-    // brings a poster to the front.
-    const swipeLocked = window.matchMedia('(max-width: 768px)');
+    // On a phone the swipe has to earn the ring. The gesture begins undecided:
+    // nothing turns until the finger has travelled AXIS_SLOP, and then it only
+    // takes the carousel if it is clearly sideways — the sideways distance at
+    // least AXIS_RATIO times the vertical one, which is a swipe within about
+    // 27 degrees of horizontal. Anything steeper, including the diagonal drift
+    // of a finger heading up the page, is read as the page's gesture and is
+    // locked out of the ring for the rest of that touch. That is what used to
+    // leak through: a few pixels of sideways wander spun the cards, and
+    // `fling` then carried the nudge on after the finger had gone.
+    // Pointer capture waits for the same verdict, so a scroll is never taken
+    // off the browser. Desktop keeps the mouse's immediate drag.
+    const axisGate = window.matchMedia('(max-width: 768px)');
+    const AXIS_SLOP = 10;     // px of travel before the direction is called
+    const AXIS_RATIO = 2;     // how much more sideways than vertical it must be
 
-    carousel.addEventListener('pointerdown', (e) => {
-      // Returning before `dragging` is set leaves the move and release
-      // handlers inert too — they both bail on it — and, as importantly,
-      // skips setPointerCapture, which would otherwise take the gesture off
-      // the browser and interfere with the scroll itself.
-      if (swipeLocked.matches) return;
+    let axis = 'idle';        // 'wait' while undecided, then 'x' or 'y'
+    let downX = 0, downY = 0, downId = -1;
 
+    const grab = (e) => {
       dragging = true;
-      dragX = e.clientX;
+      dragX = e.clientX;      // from here, so the deciding travel does not spin
       dragVel = 0;
       fling = 0;
       lastMoveTs = e.timeStamp;
@@ -321,8 +323,34 @@
       if (carousel.setPointerCapture) {
         try { carousel.setPointerCapture(e.pointerId); } catch (err) { /* not critical */ }
       }
+    };
+
+    carousel.addEventListener('pointerdown', (e) => {
+      downX = e.clientX;
+      downY = e.clientY;
+      downId = e.pointerId;
+      if (axisGate.matches) {
+        axis = 'wait';        // hold off until the direction is clear
+      } else {
+        axis = 'x';
+        grab(e);
+      }
     });
+
     window.addEventListener('pointermove', (e) => {
+      if (axis === 'wait') {
+        if (e.pointerId !== downId) return;
+        const ax = Math.abs(e.clientX - downX);
+        const ay = Math.abs(e.clientY - downY);
+        if (ax < AXIS_SLOP && ay < AXIS_SLOP) return;   // not yet far enough to tell
+        if (ax >= ay * AXIS_RATIO) {
+          axis = 'x';
+          grab(e);
+        } else {
+          axis = 'y';         // the page's to scroll; the ring stays out of it
+        }
+        return;
+      }
       if (!dragging) return;
       const dx = e.clientX - dragX;
       if (!dx) return;
@@ -334,6 +362,7 @@
       dragVel = spun / gap;
     });
     const endDrag = () => {
+      axis = 'idle';          // next touch is judged on its own
       if (!dragging) return;
       dragging = false;
       carousel.classList.remove('is-dragging');
