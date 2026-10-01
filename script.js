@@ -1790,7 +1790,7 @@
     }
   }
 
-  /* ---------- Title strip: a hover holds and lights one card, then releases ---------- */
+  /* ---------- Title strip: a hover (or, on touch, a tap) holds and lights one card ---------- */
   const titleStrip = document.getElementById('titleStrip');
 
   if (titleStrip) {
@@ -1822,7 +1822,11 @@
     // Driven by real cursor movement rather than pointerover: moving sideways
     // from one card to the next must light the new one, while a cursor sitting
     // still must not keep re-catching cards as they slide underneath it.
+    // Touch is excluded and handled as a tap below. A finger dragging the page
+    // up past the strip emits pointermove the whole way, which would otherwise
+    // rake every card it crossed into the lit state during an ordinary scroll.
     window.addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'touch') return;
       if (e.clientX === ptrX && e.clientY === ptrY) return;
       ptrX = e.clientX;
       ptrY = e.clientY;
@@ -1831,6 +1835,33 @@
       if (!card) return;                      // cursor is not over the strip
       if (card === litCard) return;           // already holding this one
       hold(card);
+    }, { passive: true });
+
+    // Touch has no hover to give, so a tap stands in for it and runs the same
+    // hold(). Judged on pointerup rather than pointerdown so that a scroll that
+    // merely begins on a card does not light it: a tap is a press that stayed
+    // put and did not linger. Touch implicitly captures the pointer to the
+    // element it started on, so the target is the card actually pressed, not
+    // whichever one has since rolled under the finger.
+    const TAP_SLOP = 10;            // px of travel still counted as a tap
+    const TAP_TIME = 600;           // ms beyond which it is a press, not a tap
+    let tapX = 0, tapY = 0, tapAt = 0;
+
+    titleStrip.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse') return;
+      tapX = e.clientX;
+      tapY = e.clientY;
+      tapAt = e.timeStamp;
+    }, { passive: true });
+
+    titleStrip.addEventListener('pointerup', (e) => {
+      if (e.pointerType === 'mouse') return;
+      if (Math.abs(e.clientX - tapX) > TAP_SLOP) return;
+      if (Math.abs(e.clientY - tapY) > TAP_SLOP) return;
+      if (e.timeStamp - tapAt > TAP_TIME) return;
+      const card = e.target && e.target.closest ? e.target.closest('.title-card') : null;
+      if (!card) return;
+      hold(card);                   // re-tapping the lit card restarts its hold
     }, { passive: true });
 
     titleStrip.addEventListener('pointerleave', release);

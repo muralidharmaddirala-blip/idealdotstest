@@ -1100,7 +1100,11 @@ section { padding: var(--space-section) 0; }
   margin: 0;
   padding: 0;
   list-style: none;
-  animation: titleRoll 46s linear infinite;
+  /* Duration tracks the card count, because titleRoll moves the track by half
+     its own width: going from 8 unique cards to 15 lengthened that half by
+     15/8, which at the old 46s would have rolled the strip 1.875x faster.
+     46 x 15/8 = 86.25s holds the approved speed in pixels per second. */
+  animation: titleRoll 86.25s linear infinite;
   will-change: transform;
 }
 .title-track.is-paused,
