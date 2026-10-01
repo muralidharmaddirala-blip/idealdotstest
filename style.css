@@ -1871,11 +1871,14 @@ section { padding: var(--space-section) 0; }
     padding: var(--header-h) 0 0;
   }
 
-  /* Smaller copy so the cards, not the text, carry the frame. Tied to the
+  /* Copy sized against the cards rather than the other way round, tied to the
      shorter of the two axes so a short phone shrinks it rather than
-     overflowing the pin. */
+     overflowing the pin. Every term of the clamp carries the same 20% as the
+     preferred size (1.25 -> 1.5, 6.2 -> 7.44, 3.4 -> 4.08, 1.85 -> 2.22), so
+     the increase holds at widths where a cap governs instead of being swallowed
+     by it — the 320px floor and the vh guard both bind on real phones. */
   .hero h1 {
-    font-size: clamp(1.25rem, min(6.2vw, 3.4vh), 1.85rem);
+    font-size: clamp(1.5rem, min(7.44vw, 4.08vh), 2.22rem);
     line-height: 1.08;
     margin-bottom: 0.6em;
   }
