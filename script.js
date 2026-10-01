@@ -102,22 +102,21 @@
     const stage = document.getElementById('posterStage');
     const originals = Array.from(stage.querySelectorAll('.poster-card'));
 
-    // Geometry solved from the reference art: 22.5deg between faces, with the
-    // cylinder radius and camera distance expressed as multiples of card width.
-    const SLOTS = 16;                      // 360 / 22.5 -> the ring closes cleanly
+    // One slot per poster, so the ring closes on the posters themselves and
+    // nothing is repeated. It used to be a fixed sixteen with the shortfall
+    // made up by cloning cards — with thirty sheets there is no shortfall, and
+    // the clones that filled it are gone.
+    const SLOTS = originals.length;
     const step = 360 / SLOTS;
-    const RADIUS_F = 3.15;
-    const PERSP_F = 3.70;
 
-    // Pad the ring out to a full circle so there is never a gap at the back.
-    // Each filler sits 8 slots (180deg) from its original, so a poster and its
-    // duplicate can never be on screen together.
-    for (let s = originals.length; s < SLOTS; s++) {
-      const clone = originals[s - originals.length + 3].cloneNode(true);
-      clone.setAttribute('aria-hidden', 'true');
-      clone.tabIndex = -1;
-      stage.appendChild(clone);
-    }
+    // Thirty faces sit 12deg apart rather than 22.5, so at the old radius a
+    // neighbour's inner edge landed at 0.16 of a card width — on top of the
+    // front card. Opening the cylinder out to 5.8 puts that edge back at
+    // 0.70, the same clearance the sixteen-slot ring had, and the camera
+    // distance keeps its old ratio to the radius. The front card therefore
+    // reads exactly as it did; there are simply more cards around the back.
+    const RADIUS_F = 5.80;
+    const PERSP_F = 6.82;
 
     const cards = Array.from(stage.querySelectorAll('.poster-card'));
     const total = cards.length;

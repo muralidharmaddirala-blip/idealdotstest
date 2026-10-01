@@ -1879,7 +1879,16 @@ section { padding: var(--space-section) 0; }
     line-height: 1.08;
     margin-bottom: 0.6em;
   }
-  .hero-actions { gap: clamp(8px, 1.4vh, 14px); }
+  /* Three fifths of the column, centred. The 480px rule above stacks them and
+     gives each button 100%, so narrowing the column they sit in is what
+     narrows the buttons — and it keeps the pair the same width as each other
+     rather than sizing each to its own label. */
+  .hero-actions {
+    gap: clamp(8px, 1.4vh, 14px);
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+  }
   .hero-actions .btn {
     padding: clamp(9px, 1.4vh, 13px) 22px;
     font-size: clamp(0.8rem, 1.9vh, 0.9rem);
@@ -1896,7 +1905,7 @@ section { padding: var(--space-section) 0; }
      The vh term is only a guard for unusually short screens; on every
      common phone the vw term governs and the tenth holds. */
   .poster-carousel {
-    --card-h: min(79.6vw, 46vh);
+    --card-h: min(78.2vw, 46vh);
     --card-w: calc(var(--card-h) * 0.8);
     height: calc(var(--card-h) + 36px);
     /* Any margin here would be added on top of the even split and break the
