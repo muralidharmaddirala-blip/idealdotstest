@@ -2099,7 +2099,12 @@ section { padding: var(--space-section) 0; }
        row 3 |  copy, four lines    │  …  BRIEF    |
   */
   .how-card__face--back {
-    --card-pad: clamp(13px, 3.8vw, 20px);
+    /* The padding is spent three times over — at the top, at the foot, and
+       again as the matched gap under the number — so every pixel added here
+       costs three of the band's height. The room for this came from closing
+       the gap between the stacked cards a little further (script.js) and from
+       a slightly tighter leading on the copy. */
+    --card-pad: clamp(14px, 4.1vw, 22px);
     --card-rg: clamp(3px, 0.9vw, 5px);
 
     display: grid;
@@ -2147,7 +2152,7 @@ section { padding: var(--space-section) 0; }
     overflow: hidden;
     margin: 0;
     font-size: clamp(0.62rem, 2.72vw, 0.74rem);
-    line-height: 1.32;
+    line-height: 1.3;
   }
 
   /* The words hold the second column from the name's top edge down to the
@@ -2157,10 +2162,18 @@ section { padding: var(--space-section) 0; }
      and the middle two at equal intervals between them. */
   .how-card__tags {
     grid-area: 2 / 2 / 4 / 3;
-    /* Wide enough for "Art direction", the longest of the sixteen, to stand
-       on one line — and wide enough that the copy beside it falls in four
-       lines on every phone rather than three on the larger ones. */
-    width: clamp(84px, 30vw, 132px);
+
+    /* The set is only as wide as the longest of the sixteen words needs —
+       "Art direction" — so its right edge lands on the padding rather than
+       stopping short of it. Measured in em of its own type, not in vw, which
+       is what keeps it hugging the text at every width instead of opening a
+       gap as the column grows faster than the words do.
+       box-sizing is border-box here, so the padding is added back on for the
+       rule to stand clear of the copy. Being a fixed measure it comes out the
+       same in all four cards, so the four sets share one left edge — and the
+       room it gives back goes to the paragraph, which is why that now has
+       space to fall in four lines without overflowing. */
+    width: calc(9.9em + clamp(13px, 3.6vw, 19px));
     justify-content: space-between;
     padding: 0 0 0 clamp(13px, 3.6vw, 19px);
     border-top: 0;
@@ -2169,6 +2182,12 @@ section { padding: var(--space-section) 0; }
     line-height: 1.3;
     font-size: clamp(0.52rem, 2.2vw, 0.62rem);
     letter-spacing: 0.08em;
+
+    /* Each word starts on the set's left edge; nowrap so that if a face ever
+       renders a touch wider than estimated the word reaches into the padding
+       rather than breaking onto a second line. */
+    text-align: left;
+    white-space: nowrap;
   }
   .how-card__tags li:nth-child(n + 3) { display: block; }
 }
@@ -2181,7 +2200,10 @@ section { padding: var(--space-section) 0; }
    padding and four words. */
 @media (max-width: 768px) and (max-height: 700px) {
   .how-card__face--back p { display: none; }
-  .how-card__face--back { padding: clamp(11px, 3.2vw, 16px); }
+  /* Redefining the token rather than `padding` directly: the gap under the
+     number is derived from it, so setting the padding on its own would leave
+     that gap at the taller frames' value and break the match here. */
+  .how-card__face--back { --card-pad: clamp(11px, 3.2vw, 16px); }
 }
 /* On the shortest frames the band cannot hold four words on the open rhythm,
    so the column tightens rather than dropping any of them. */

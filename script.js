@@ -1191,7 +1191,7 @@
       // Stacked, the cards need less air between them than four columns do,
       // and the height it gives back is what lets each band carry its padding,
       // its heading and four lines of copy.
-      const gap = (narrow ? 10 : GAP_PX) * splitAt;
+      const gap = (narrow ? 8 : GAP_PX) * splitAt;
       cards.style.gap = gap.toFixed(2) + 'px';
       const deg = (180 * flipAt).toFixed(2) + 'deg';
       // Stacked cards turn about the horizontal axis — top edge over bottom —
