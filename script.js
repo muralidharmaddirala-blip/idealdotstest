@@ -295,7 +295,23 @@
     carousel.addEventListener('pointerleave', () => { hovered = -1; });
 
     /* Swipe to spin: direction and speed both come from the gesture. */
+    // Locked at phone width. A finger travelling up the screen to reach the
+    // next section is never perfectly vertical, and the few pixels of sideways
+    // drift were enough to spin the ring by hand — then `fling` carried that
+    // nudge on after the finger left, which is what read as the carousel
+    // twitching as you scrolled past it. Nothing else changes: the rotation
+    // that follows the scroll (DEG_PER_PX) and the idle drift (SPEED) are
+    // untouched, so the cards still turn as they do now, and a tap still
+    // brings a poster to the front.
+    const swipeLocked = window.matchMedia('(max-width: 768px)');
+
     carousel.addEventListener('pointerdown', (e) => {
+      // Returning before `dragging` is set leaves the move and release
+      // handlers inert too — they both bail on it — and, as importantly,
+      // skips setPointerCapture, which would otherwise take the gesture off
+      // the browser and interfere with the scroll itself.
+      if (swipeLocked.matches) return;
+
       dragging = true;
       dragX = e.clientX;
       dragVel = 0;
