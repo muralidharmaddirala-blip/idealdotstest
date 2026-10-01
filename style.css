@@ -2099,19 +2099,29 @@ section { padding: var(--space-section) 0; }
        row 3 |  copy, four lines    │  …  BRIEF    |
   */
   .how-card__face--back {
-    /* The padding is spent three times over — at the top, at the foot, and
-       again as the matched gap under the number — so every pixel added here
-       costs three of the band's height. The room for this came from closing
-       the gap between the stacked cards a little further (script.js) and from
-       a slightly tighter leading on the copy. */
-    --card-pad: clamp(14px, 4.1vw, 22px);
-    --card-rg: clamp(3px, 0.9vw, 5px);
+    /* --- the card as one proportionally scaled piece -----------------------
+       --cw is the band's width, handed down from script.js. Every measure in
+       this card is a fixed share of it, and the band's height is itself a
+       fixed 0.421 of it, so the card is a shape: narrowing the screen scales
+       the whole group down with its proportions, spacing and hierarchy intact,
+       rather than letting each card reflow and grow its own height.
+       The shares were solved against the longest copy in the four cards and
+       clear the box for any character width up to 0.72em — nothing here needs
+       to clip, hide or scroll to stay inside the padding.
+         padding   0.045      copy column  0.569
+         number    0.030      word column  0.299
+         heading   0.048      row gap      0.010
+         copy      0.030      column gap   0.042
+       The px fallbacks are only for the first frame, before the script has
+       measured anything. */
+    --card-pad: calc(var(--cw, 327px) * 0.045);
+    --card-rg: calc(var(--cw, 327px) * 0.01);
 
     display: grid;
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto auto;
     align-content: start;
-    column-gap: clamp(13px, 3.6vw, 19px);
+    column-gap: calc(var(--cw, 327px) * 0.042);
     row-gap: var(--card-rg);
     padding: var(--card-pad);
   }
@@ -2122,7 +2132,7 @@ section { padding: var(--space-section) 0; }
     grid-area: 1 / 1 / 2 / 3;
     align-items: center;
     line-height: 1.2;
-    gap: clamp(8px, 2.4vw, 12px);
+    gap: calc(var(--cw, 327px) * 0.028);
 
     /* The number sits in its own band of air: the space beneath it, down to
        the set below, matches the space above it, which is the padding. A grid
@@ -2131,28 +2141,27 @@ section { padding: var(--space-section) 0; }
     margin-bottom: calc(var(--card-pad) - var(--card-rg));
   }
   .how-card__num {
-    font-size: clamp(0.56rem, 2.3vw, 0.66rem);
+    font-size: calc(var(--cw, 327px) * 0.03);
     line-height: 1.2;
   }
 
   .how-card__face--back h3 {
     grid-area: 2 / 1 / 3 / 2;
-    font-size: clamp(0.88rem, 3.8vw, 1.12rem);
+    font-size: calc(var(--cw, 327px) * 0.048);
     line-height: 1.04;
   }
 
-  /* Four lines, and the column is sized so the longest copy falls in exactly
-     that many — -webkit-box is also what overrides the display:none it
-     carries from the 860px rule. */
+  /* Shown whole. The column is wide enough, and the box tall enough, that
+     the longest of the four paragraphs lands inside it without being cut —
+     so there is no clamp here and nothing is hidden or scrolled. `block`
+     is what overrides the display:none it carries from the 860px rule. */
   .how-card__face--back p {
     grid-area: 3 / 1 / 4 / 2;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 4;
-    overflow: hidden;
+    display: block;
     margin: 0;
-    font-size: clamp(0.62rem, 2.72vw, 0.74rem);
-    line-height: 1.3;
+    min-width: 0;          /* a grid item will not shrink below its text without this */
+    font-size: calc(var(--cw, 327px) * 0.03);
+    line-height: 1.4;
   }
 
   /* The words hold the second column from the name's top edge down to the
@@ -2173,14 +2182,14 @@ section { padding: var(--space-section) 0; }
        same in all four cards, so the four sets share one left edge — and the
        room it gives back goes to the paragraph, which is why that now has
        space to fall in four lines without overflowing. */
-    width: calc(9.9em + clamp(13px, 3.6vw, 19px));
+    width: calc(9.9em + var(--cw, 327px) * 0.042);
     justify-content: space-between;
-    padding: 0 0 0 clamp(13px, 3.6vw, 19px);
+    padding: 0 0 0 calc(var(--cw, 327px) * 0.042);
     border-top: 0;
     border-left: 1px solid rgba(255, 255, 255, 0.12);
     gap: 0;
-    line-height: 1.3;
-    font-size: clamp(0.52rem, 2.2vw, 0.62rem);
+    line-height: 1.15;
+    font-size: calc(var(--cw, 327px) * 0.026);
     letter-spacing: 0.08em;
 
     /* Each word starts on the set's left edge; nowrap so that if a face ever
@@ -2192,27 +2201,15 @@ section { padding: var(--space-section) 0; }
   .how-card__tags li:nth-child(n + 3) { display: block; }
 }
 
-/* Short frames leave the band room for only one or two lines of a paragraph
-   that wants five or six, and a fragment reads worse than nothing — so below
-   this the copy comes out altogether and the card is the number, the name and
-   the four words. Above it the copy fits whole, inside the four-line ceiling.
-   The padding comes back in too: a 73px band cannot carry both the open
-   padding and four words. */
-@media (max-width: 768px) and (max-height: 700px) {
-  .how-card__face--back p { display: none; }
-  /* Redefining the token rather than `padding` directly: the gap under the
-     number is derived from it, so setting the padding on its own would leave
-     that gap at the taller frames' value and break the match here. */
-  .how-card__face--back { --card-pad: clamp(11px, 3.2vw, 16px); }
-}
-/* On the shortest frames the band cannot hold four words on the open rhythm,
-   so the column tightens rather than dropping any of them. */
-@media (max-width: 768px) and (max-height: 620px) {
-  .how-card__tags {
-    line-height: 1;
-    font-size: clamp(0.5rem, 2.1vw, 0.58rem);
-  }
-}
+/* The two height breakpoints that used to sit here are gone. They hid the
+   copy below 700px and changed the word size below 620px, which made two
+   phones of the same width render differently — and because a mobile
+   viewport's height changes as the address bar collapses, scrolling could
+   cross either line and make the copy appear and vanish mid-scroll. Both
+   were patches for type that was sized in vw inside a height-driven box;
+   with the type now proportioned to the band itself (the --c-* set from
+   script.js) neither is needed, and the copy is always present with as many
+   lines as the band holds. */
 
 /* ===================================================================
    MOBILE ONLY (<= 768px) — about section's dot box

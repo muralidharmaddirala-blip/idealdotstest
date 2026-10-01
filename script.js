@@ -1191,7 +1191,11 @@
       // Stacked, the cards need less air between them than four columns do,
       // and the height it gives back is what lets each band carry its padding,
       // its heading and four lines of copy.
-      const gap = (narrow ? 8 : GAP_PX) * splitAt;
+      // Taken as a share of the band's width on mobile, not a fixed 8px: that
+      // is what holds every band's height at a constant fraction of its width,
+      // so the stack keeps its proportions as the group scales. A fixed gap
+      // made the shorter cards relatively taller than the wider ones.
+      const gap = (narrow ? bandW * 0.022 : GAP_PX) * splitAt;
       cards.style.gap = gap.toFixed(2) + 'px';
       const deg = (180 * flipAt).toFixed(2) + 'deg';
       // Stacked cards turn about the horizontal axis — top edge over bottom —
@@ -1204,6 +1208,15 @@
         // gaps are taken out of the bands, as they are on desktop, so the
         // stack keeps the box it had and its top edge never moves.
         const sliceH = (bandH - gap * (N - 1)) / N;
+
+        // --- one number the whole card is drawn from ------------------------
+        // With the gap between the bands taken as a share of the width too,
+        // every band's height is a fixed 0.421 of its width, whatever the
+        // screen. That makes the card a shape rather than a box that happens
+        // to be a certain size — so handing its width to the stylesheet is
+        // enough for everything inside to be a proportion of it, and the four
+        // cards scale as one piece instead of each reflowing on its own.
+        cards.style.setProperty('--cw', bandW.toFixed(2) + 'px');
 
         // The picture covers the box and is then cut across. Cover rather than
         // fit, because a landscape picture in a portrait box would otherwise
