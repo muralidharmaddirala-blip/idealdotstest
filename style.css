@@ -1922,12 +1922,16 @@ section { padding: var(--space-section) 0; }
    =================================================================== */
 @media (max-width: 768px) {
 
-  /* Was a full viewport tall, which opened most of a screen of empty black
-     between the posters above and the services below. Sized to the dot field
-     plus its margin instead, so the band reads as one piece with its
-     neighbours rather than a gap between them. */
+  /* A full screen and a little over, which is what it takes for the posters
+     to be gone by the time the copy is centred.
+     The band's copy sits at its middle, so the page is scrolled to
+     178vh + H/2 - 50vh when that happens, and the hero's pinned layer ends at
+     178vh. The two meet at H = 100vh: any shorter and the foot of the
+     carousel is still on screen above the copy — at the 52vh this was, a
+     full 24vh of it. 104vh clears it with a little to spare, and the extra
+     height is also the wider gap between the cards and this band. */
   .manifesto {
-    min-height: 52vh;
+    min-height: 104vh;
     padding: clamp(20px, 4vh, 40px) 24px;
   }
 

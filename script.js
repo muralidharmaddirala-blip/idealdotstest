@@ -1457,7 +1457,12 @@
         // which is what keeps the desktop geometry exactly as it was.
         if (storyNarrow.matches) {
           rx = w * 0.42;
-          ry = h * 0.48;
+          // Upright, but held to one and four fifths of its width. The band is
+          // a full screen tall now, and a straight share of that height would
+          // draw the field out to three times its width; this keeps the shape
+          // it had when the band was shorter and leaves it centred in the
+          // taller one rather than smeared down it.
+          ry = Math.min(h * 0.48, rx * 1.8);
           radius = Math.max(rx, ry);
         } else {
           radius = Math.min(w * 0.38, h * 0.46);
