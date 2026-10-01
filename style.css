@@ -1931,8 +1931,19 @@ section { padding: var(--space-section) 0; }
      full 24vh of it. 104vh clears it with a little to spare, and the extra
      height is also the wider gap between the cards and this band. */
   .manifesto {
-    min-height: 104vh;
-    padding: clamp(20px, 4vh, 40px) 24px;
+    /* 100vh is the floor, not a round number. The hero's track ends at 178vh,
+       and with the copy at this section's centre, centring it puts the page at
+       178vh + H/2 - 50vh — which clears the hero's foot only while H is at
+       least 100vh. Below that the carousel reappears behind the copy. The 4vh
+       that was here on top of it is what comes off. */
+    min-height: 100vh;
+    /* The copy sits 3.8vh below the band's middle — the dot field is dropped
+       by the same amount in script.js, so the two stay together. Shifting the
+       pair down is what shortens the empty tail under them: the band itself
+       cannot shrink past 100vh without the carousel reappearing. A flex box
+       centres its content in the box left after padding, so the extra 7.6vh
+       on top moves that centre down by half of it. */
+    padding: calc(clamp(20px, 4vh, 40px) + 7.6vh) 24px clamp(20px, 4vh, 40px);
   }
 
   /* Larger copy, on a measure narrow enough that every line breaks to exactly
@@ -2258,4 +2269,124 @@ section { padding: var(--space-section) 0; }
      The space above the logo is untouched at 52px. */
   .footer-grid { padding-bottom: clamp(6px, 2vw, 12px); }
   .footer-newsletter .form-status { margin-top: 8px; }
+}
+
+/* ===================================================================
+   MOBILE ONLY (<= 768px) — stats band's moving fill
+   =================================================================== */
+@media (max-width: 768px) {
+
+  /* The same gradient the dot box in About carries, and here it drifts.
+     A gradient is not an animatable value, so rather than animating the
+     band's own background this lays an oversized copy of it behind the
+     figures and slides that — a transform, which the compositor handles, in
+     place of a background-position animation, which would repaint the whole
+     band every frame on top of the scroll work the page is already doing. */
+  .stats {
+    /* The dot box's gradient, taken up to 20%: its brightest stop was #171717,
+       nine per cent of white, which left almost nothing to see moving. #333333
+       is twenty, and the middle stop is lifted by the same proportion so the
+       ramp keeps its shape. Kept local to this band rather than pushed into
+       --gradient-dark, which the dot box itself still reads. */
+    --stats-fill: linear-gradient(135deg, #000000 0%, #1d1d1d 55%, #333333 100%);
+
+    position: relative;
+    overflow: hidden;
+    background: var(--stats-fill);
+  }
+  .stats::before {
+    content: '';
+    position: absolute;
+    /* Half again the band's width on each side and most of its height above
+       and below, which is what lets the drift below run as far as it does
+       without ever pulling an edge of the gradient into view. */
+    inset: -70% -50%;
+    z-index: 0;
+    background: var(--stats-fill);
+    pointer-events: none;
+    will-change: transform;
+    animation: statsDrift 18s ease-in-out infinite;
+  }
+  /* The figures sit above the moving fill. */
+  .stats-band {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Twice the travel it had, along the gradient's own 135deg axis so the light
+   reads as moving through the band rather than across it. */
+@keyframes statsDrift {
+  0%, 100% { transform: translate3d(-18%, -10%, 0); }
+  50%      { transform: translate3d(18%, 10%, 0); }
+}
+
+/* It is a slow ambient drift, so it goes when motion is not wanted. */
+@media (prefers-reduced-motion: reduce) {
+  .stats::before { animation: none; }
+}
+
+/* ===================================================================
+   MOBILE ONLY (<= 768px) — services track length
+   =================================================================== */
+@media (max-width: 768px) {
+  /* The track's length is what sets how slowly everything moves: each stage
+     gets a share of it, and a stage covering a fixed distance over more
+     scroll is a stage that moves less per pixel. At 260vh the halving comes
+     down to roughly half a pixel of edge for every pixel scrolled — slow and
+     deliberate — and the climb settles with it rather than being squeezed,
+     which it would be if the halving simply took a bigger share of a shorter
+     track.
+     The cost is on the way back up: the halving and the list are latched, so
+     the scroll they occupy is scroll with nothing moving. That still stretch
+     grows with the track in the same proportion — at this length it is about
+     a screen and a half. */
+  .svc-track { height: 320vh; }
+}
+
+/* ===================================================================
+   MOBILE ONLY (<= 768px) — the services list arriving
+   =================================================================== */
+@media (max-width: 768px) {
+
+  /* One row after another, as one run. The whole cascade is a transition with
+     a delay per row: script.js adds .is-formed when the scroll reaches the
+     list's mark and the browser carries it to the end on its own — it cannot
+     be cut short by the next scroll event, and a reader who stops still sees
+     it finish. The alternative was writing an opacity per row per frame and
+     keeping a loop alive to do it.
+     The rise is small and the fade a little longer than it, so each row
+     settles into place rather than arriving and then stopping. */
+  .svc-eyebrow,
+  .svc-item {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 400ms ease, transform 400ms cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  .svc-panel.is-formed .svc-eyebrow,
+  .svc-panel.is-formed .svc-item {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* 60ms between one row and the next: enough to read as a sequence, short
+     enough that the seven of them are done inside 0.8s. */
+  .svc-eyebrow                 { transition-delay: 0ms; }
+  .svc-item:nth-child(1)       { transition-delay: 60ms; }
+  .svc-item:nth-child(2)       { transition-delay: 120ms; }
+  .svc-item:nth-child(3)       { transition-delay: 180ms; }
+  .svc-item:nth-child(4)       { transition-delay: 240ms; }
+  .svc-item:nth-child(5)       { transition-delay: 300ms; }
+  .svc-item:nth-child(6)       { transition-delay: 360ms; }
+
+  /* Leaving, they go together and at once — a staggered exit on the way back
+     up would read as the cascade running backwards. */
+  .svc-panel:not(.is-formed) .svc-eyebrow,
+  .svc-panel:not(.is-formed) .svc-item { transition-delay: 0ms; }
+}
+
+/* It is an entrance, so it goes when motion is not wanted. */
+@media (prefers-reduced-motion: reduce) {
+  .svc-eyebrow,
+  .svc-item { transition: none; }
 }

@@ -521,6 +521,11 @@
   }
 
   /* ---------- Services: rail image -> half -> list builds -> full bleed ---------- */
+  // How far below its band's middle the brand story's dot field sits. The
+  // field is drawn from it, and the services image's fade-in is timed off the
+  // field's centre, so the two have to agree on where that centre is.
+  const STORY_FIELD_DROP = 0.038;
+
   const svcSection = document.getElementById('services');
   const svcTrack = document.getElementById('svcTrack');
   const svcPin = document.getElementById('svcPin');
@@ -532,6 +537,7 @@
     const shade = document.querySelector('.svc-shade');
     const panel = document.getElementById('svcPanel');
     const list = document.getElementById('svcList');
+    const storyBand = document.getElementById('story');
     const items = Array.from(document.querySelectorAll('.svc-item'));
     const shots = Array.from(document.querySelectorAll('.svc-shot'));
     const eyebrow = document.querySelector('.svc-eyebrow');
@@ -558,15 +564,25 @@
     // while still overlapping enough to read as one movement — and rises this
     // far into place. The run's LENGTH is not set here: it is worked out from
     // the rise so each row moves at the halving's rate (see below).
-    // Narrower slices make the run longer without touching the rate: each row
-    // still rises ENTER_RISE at the halving's pace, there is just more of the
-    // track between one starting and the next. That is the only lever that
-    // slows the cascade down and leaves the rates matched.
-    const ENTER_SPAN = 0.25;
-    const ENTER_RISE = 34;
-    const M_HOLD = 0.015;        // breath between one movement and the next
-    const M_LEAD = 0.06;         // approach before the halving starts
-    const M_TAIL = 0.03;         // the finished layout, held, before it lets go
+    // The rows' own entrance lives in the stylesheet now — a transition with
+    // a delay per row — so there is nothing to size here.
+    // A third resting stretch, after the list has come in. It was a 0.006
+    // breath — about ten pixels of scroll, which is no pause at all. At 0.10
+    // the finished layout holds for a couple of hundred pixels of scrolling
+    // before the block starts to climb, so the list can actually be read.
+    const M_HOLD = 0.10;         // the formed list, holding
+    // Two stretches where the image is deliberately still: once it has faded
+    // up at full size, and again once it has halved. Each is a share of the
+    // track, so the reader scrolls through them with nothing changing — which
+    // is what lets each state be seen rather than passed through.
+    const H_FULL = 0.06;         // full image, holding
+    const H_HALF = 0.06;         // half image, holding, before the list
+    // No tail. Anything left over here is scroll with the section pinned and
+    // nothing moving — the climb used to finish a little short of the end of
+    // the track and the last of it was spent holding still. At 0 the list
+    // reaching the foot of the frame and the pin releasing are the same
+    // moment, so the hand-off to the section below is unbroken.
+    const M_TAIL = 0;
     // Stacked, the rows size themselves from their content and the list is as
     // tall as that makes it — free to run past the foot of the frame. On the
     // next scroll it slides up behind the halved image and fades out over the
@@ -684,13 +700,40 @@
       if (svcNarrow.matches) {
         const navEl = document.getElementById('siteHeader');
         const navH = navEl ? navEl.getBoundingClientRect().height : 76;
-        imgT = Math.round(navH + pinH * 0.03);
+        // Just clear of the bar, with a hairline of breathing room rather than
+        // 3% of the frame — the 25px that was here read as part of the gap
+        // between this section and the one above it.
+        imgT = Math.round(navH + pinH * 0.012);
         imgH = Math.round(pinH - imgT - pinH * 0.05);
       } else {
         imgH = Math.round(pinH * 0.76);
         imgT = Math.round((pinH - imgH) / 2);
       }
-      const enter = ramp(0, window.innerHeight * 0.8, window.innerHeight * 0.8 - rect.top);
+      // The image's fade-up, on mobile, is timed off the band above rather
+      // than off this section's own approach: it begins the moment the dot
+      // field's centre reaches the foot of the bar, and finishes as this
+      // section's top reaches the top of the frame.
+      //
+      // That span works out without needing either scroll position. The field
+      // sits STORY_FIELD_DROP below the band's middle, so its centre is
+      // bandH * (0.5 + DROP) below the band's top; this section begins bandH
+      // below it. The distance between the two events is therefore
+      //   bandH - bandH * (0.5 + DROP) + navH  =  bandH * (0.5 - DROP) + navH
+      // and `rect.top` counts down through exactly that distance — so it is
+      // the span to read the fade off, in place of a viewport height.
+      //
+      // track() rather than ramp(), so from the moment it starts the opacity
+      // follows the scroll one for one instead of easing through the middle.
+      let fadeSpan = window.innerHeight;
+      if (svcNarrow.matches && storyBand) {
+        const navEl2 = document.getElementById('siteHeader');
+        const navH2 = navEl2 ? navEl2.getBoundingClientRect().height : 76;
+        fadeSpan = Math.max(1,
+          storyBand.offsetHeight * (0.5 - STORY_FIELD_DROP) + navH2);
+      }
+      const enter = svcNarrow.matches
+        ? track(0, fadeSpan, fadeSpan - rect.top)
+        : ramp(0, window.innerHeight * 0.8, window.innerHeight * 0.8 - rect.top);
 
       // Scrolling back reverses the expand, but never the split or the list:
       // once the layout is established it holds, even back at the section top.
@@ -729,27 +772,31 @@
         mPanelH = panel.offsetHeight || Math.max(1, pinH - pTop);
         mOverrun = Math.max(0, pTop + mPanelH - pinH);
 
-        // Three movements, and all three distances are known: the image's
-        // lower edge rising half the block, the rows coming up, and the block
-        // climbing until the list rests on the foot of the frame. So the track
-        // is divided between them in proportion to those distances, in one
-        // step — which puts them all at a single rate and uses the whole
-        // track, leaving neither a movement cut short at the end nor a
-        // screenful of dead scroll after the last one.
-        const dHalve = imgH * (1 - V_SHARE);
-        const dForm = ENTER_RISE / ENTER_SPAN;   // the run's own travel
-        const dClimb = mOverrun;
-        const total = Math.max(1, dHalve + dForm + dClimb);
-        const budget = 1 - M_LEAD - 2 * M_HOLD - M_TAIL;
+        // The track used to be divided in proportion to the three distances,
+        // which handed the halving nearly half of it. The halving is the one
+        // stage that does NOT play backwards — the established layout is held
+        // on the way up — so that half was the still stretch.
+        //
+        // So it is split the other way round now: the halving and the list
+        // take a small fixed share, and the climb takes everything left. The
+        // climb is the stage that does reverse, so putting the track into it
+        // is what keeps the reverse pass moving for as much of the way as
+        // possible. One hold, not two — the halving runs straight into the
+        // list, so only the gap before the climb is subtracted.
+        // The halving gets nearly half the track to itself, which is what makes
+        // it slow: the image's lower edge now rises about 0.87px for every
+        // pixel scrolled, where before it rose 1.73 — twice as much per
+        // pixel, so the whole change was over in half the scroll. Under 1 the
+        // image lags the finger slightly, which is what reads as a deliberate
+        // transition rather than a snap.
+        const sSplit = 0.48;    // the halving, taken slowly
+        const sForm = 0.04;     // the list arriving, all at once
+        const sTravel = Math.max(0.04,
+          1 - H_FULL - sSplit - H_HALF - sForm - M_HOLD - M_TAIL);
 
-        const sSplit = budget * (dHalve / total);
-        const sForm = budget * (dForm / total);
-        const sTravel = budget * (dClimb / total);
-
-        W_SPLIT = [M_LEAD, M_LEAD + sSplit];
-        // No gap after the halving: the card settling at half and the first row
-        // coming up read as one movement.
-        W_LIST = [W_SPLIT[1], W_SPLIT[1] + sForm];
+        //   hold full | halving | hold half | list | · | climb
+        W_SPLIT = [H_FULL, H_FULL + sSplit];
+        W_LIST = [W_SPLIT[1] + H_HALF, W_SPLIT[1] + H_HALF + sForm];
         W_TRAVEL = [W_LIST[1] + M_HOLD, W_LIST[1] + M_HOLD + sTravel];
 
         // Nothing expands. Putting the window past the end of the track is how
@@ -827,7 +874,17 @@
       media.style.opacity = (settled ? 1 : enter).toFixed(3);
       media.style.zIndex = expand > 0.001 ? '4' : '1';
 
-      const gone = settled ? 1 : ramp(INTRO_OUT[0], INTRO_OUT[1], p);
+      // The statement leaves with the image rather than in a short window of
+      // its own. INTRO_OUT is a tenth of the track — fine on desktop, but
+      // against a halving that now takes nearly half of it the words were
+      // gone long before the image had moved. Mapped to the halving's own
+      // window instead, so the two are one movement and the text fades at
+      // exactly the pace the image comes down. Smoothstepped rather than
+      // linear so it eases away at both ends instead of starting and stopping
+      // dead; the wash behind it already thins on the same (1 - split).
+      const gone = settled ? 1
+        : svcNarrow.matches ? smooth(W_SPLIT[0], W_SPLIT[1], p)
+                            : ramp(INTRO_OUT[0], INTRO_OUT[1], p);
       intro.style.left = mediaX.toFixed(1) + 'px';
       intro.style.width = mediaW.toFixed(1) + 'px';
       intro.style.top = (mediaY + groupShift).toFixed(1) + 'px';
@@ -857,7 +914,9 @@
       // null hands the height back to the stylesheet, which lets the rows
       // measure themselves; desktop still pins it to the image's height.
       panel.style.height = panelH === null ? '' : panelH.toFixed(1) + 'px';
-      panel.style.opacity = panelIn.toFixed(3);
+      // On mobile the rows carry their own fade (a CSS transition, below), so
+      // the panel stays solid — multiplying the two would dim the cascade.
+      panel.style.opacity = (svcNarrow.matches ? 1 : panelIn).toFixed(3);
       // Off mobile the block rises as one. On mobile each row carries its own
       // entrance rise (below), so the panel holds only the group's climb —
       // the same shift the image is given, which is what keeps them together.
@@ -867,37 +926,25 @@
 
       // --- the rows arriving ---
       if (svcNarrow.matches) {
-        // Only an entrance now. The rows used to fade as the image's lower
-        // edge passed them, because the list ran up behind it; the block
-        // travels as one piece instead, so nothing passes behind anything and
-        // there is nothing to fade out — the rows come up, and then scroll
-        // away with the section.
-        const step = fadeEls.length > 1
-          ? (1 - ENTER_SPAN) / (fadeEls.length - 1)
-          : 0;
+        // Handed to the stylesheet. Each row has a transition with its own
+        // delay, so adding the class is the whole of it: the browser runs the
+        // cascade to the end by itself, one row after another, and a reader
+        // who stops scrolling still sees it finish. Driving it from here
+        // instead would mean writing an opacity per row per frame and keeping
+        // a loop alive to do it while nothing else was happening.
+        panel.classList.toggle('is-formed', formed > 0);
 
-        for (let i = 0; i < fadeEls.length; i++) {
-          const el = fadeEls[i];
-
-          // This element's own slice of the formation. It comes up into place
-          // from ENTER_RISE below, fading as it rises, and the last of them
-          // lands as the card reaches half height. The slices overlap by
-          // (1 - ENTER_SPAN), so one is always arriving as the last settles.
-          const li = Math.min(1, Math.max(0, (formed - i * step) / ENTER_SPAN));
-          const rise = (1 - li) * ENTER_RISE;   // linear: one steady rate
-          const into = li * li * (3 - 2 * li);  // smoothed: the fade only
-
-          el.style.opacity = into.toFixed(3);
-          el.style.transform = rise > 0.01 ? 'translateY(' + rise.toFixed(1) + 'px)' : '';
+        // Inline values from a previous desktop frame would override the
+        // stylesheet, so they are cleared the once.
+        if (!staggered) {
+          for (let i = 0; i < fadeEls.length; i++) {
+            fadeEls[i].style.opacity = '';
+            fadeEls[i].style.transform = '';
+          }
+          staggered = true;
         }
-        staggered = true;
       } else if (staggered) {
-        // Back on desktop: hand opacity and transform back to the stylesheet,
-        // or the rows would keep whatever the last mobile frame left on them.
-        for (let i = 0; i < fadeEls.length; i++) {
-          fadeEls[i].style.opacity = '';
-          fadeEls[i].style.transform = '';
-        }
+        panel.classList.remove('is-formed');
         staggered = false;
       }
 
@@ -1026,6 +1073,19 @@
     // stays that way: scrolling back up ends there rather than replaying the
     // entrance. Only leaving the section altogether arms it again.
     let formed = false;
+    // Once the cards have turned, that is where they stay on a phone: coming
+    // back up through the section leaves them as four turned cards rather than
+    // closing them into the picture again.
+    //
+    // It needs no direction flag. Going down, the lock changes nothing — past
+    // the turn the cards are already four and facing the reader, and before it
+    // the lock is not set yet — so it can only ever take effect on the way up,
+    // which is where it is wanted.
+    //
+    // Released by the same clearance that re-arms `formed`: once the section
+    // has dropped a whole viewport below, out of sight, so the reset itself is
+    // never seen and the next pass down plays in full.
+    let locked = false;
     let seen = false;               // has the reader actually been inside the track
     let raf = null;
         let lastP = 0;
@@ -1314,12 +1374,17 @@
       // making it wait there is what let a fast reader out before the turn.
       const held = zoomFullAt && (t - zoomFullAt >= HOLD_MS || lastP > 0.97);
       if (lastP >= SPLIT_AT && held) setSplit(1);
+
+      // The turn landing is what sets the lock.
+      if (howNarrow.matches && flipAt > 0.999) locked = true;
+
       // Coming back, the cards turn round first and only then close up, so the
-      // two movements never overlap however fast the page is scrolled.
-      if (lastP < SPLIT_AT && flipAt < 0.01) setSplit(0);
+      // two movements never overlap however fast the page is scrolled. Under
+      // the lock neither happens: they hold as four.
+      if (!locked && lastP < SPLIT_AT && flipAt < 0.01) setSplit(0);
 
       // The turn. The widening rides along with it, out and back.
-      const wantFlip = lastP >= FLIP_AT && splitAt > 0.98;
+      const wantFlip = locked || (lastP >= FLIP_AT && splitAt > 0.98);
       if (wantFlip !== flipped) {
         flipped = wantFlip;
         cards.classList.toggle('is-flipped', flipped);
@@ -1343,7 +1408,29 @@
 
       // Dropping back below the fold clears the section down, so coming at it
       // again replays the whole sequence from the picture fading up.
-      if (rect.top >= vh) { formed = false; seen = false; }
+      if (rect.top >= vh) {
+        formed = false;
+        seen = false;
+
+        // Clearing `locked` on its own is not enough: `stage()` re-arms it
+        // from whatever flipAt still holds, and flipAt is still 1 at this
+        // point — so the lock would set itself straight back and the cards
+        // would never return to the picture. The sequence has to be put back
+        // to its start outright, and instantly rather than animated, for the
+        // same reason.
+        // Guarded on `locked`, which is only ever set on mobile, so the
+        // desktop path through here is exactly as it was.
+        if (locked) {
+          locked = false;
+          splitAt = splitFrom = splitTo = 0;
+          flipAt = flipFrom = flipTo = 0;
+          zoomFullAt = 0;
+          flipped = false;
+          cards.classList.remove('is-flipped');
+          cards.classList.remove('is-live');
+          kick();
+        }
+      }
       if (raw >= 0 && raw <= 1) seen = true;
 
       // At or beyond the track's foot, wait for the final turn to land before
@@ -1426,6 +1513,8 @@
 
       let dpr = 1, w = 0, h = 0, gap = 34, radius = 0, cols = 0, rows = 0, ox = 0, oy = 0;
       let rx = 0, ry = 0;                     // semi-axes of the field's footprint
+      let drop = 0;                           // how far below centre it sits
+      const FIELD_DROP = STORY_FIELD_DROP;    // of the band's height, on mobile
       let sigma = 100, reach = 0;
 
       const smoothstep = (a, b, x) => {
@@ -1460,10 +1549,17 @@
         rx = radius;
         ry = radius;
 
+        // The field sits a little below the band's middle on mobile, the same
+        // distance the copy is shifted down by in the stylesheet. That is what
+        // closes the empty tail under it: the band cannot get any shorter
+        // without the hero's carousel reappearing behind the copy, so the
+        // field moves down inside it instead. Dead centre off mobile.
+        drop = storyNarrow.matches ? h * FIELD_DROP : 0;
+
         cols = Math.ceil((rx * 2) / gap) + 1;
         rows = Math.ceil((ry * 2) / gap) + 1;
         ox = w / 2 - ((cols - 1) * gap) / 2;
-        oy = h / 2 - ((rows - 1) * gap) / 2;
+        oy = h / 2 + drop - ((rows - 1) * gap) / 2;
         sigma = radius * 0.3;
         reach = radius * 1.3;
       };
@@ -1475,7 +1571,7 @@
         ctx.clearRect(0, 0, w, h);
         for (let b = 0; b < BUCKETS; b++) paths[b] = new Path2D();
 
-        const cx = w / 2, cy = h / 2;
+        const cx = w / 2, cy = h / 2 + drop;
         const fadeFrom = radius * 0.42;
 
         const ringR = [], ringAmp = [];
